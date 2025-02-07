@@ -2,16 +2,22 @@ const express = require("express");
 const Stripe = require("stripe");
 const dotenv = require("dotenv");
 const Order = require("../models/Order");
+const authMiddleware = require("../middleware/authMiddleware"); // Ajout du middleware
 
 dotenv.config();
 const router = express.Router();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   try {
-      const { cart, customerEmail } = req.body;
+      const { cart } = req.body;
 
-      console.log("📩 Données reçues dans /checkout :", req.body); // Debug
+      console.log("📩 Données reçues dans /checkout :", cart);
+
+      // Vérification si le panier est vide
+      if (!cart || cart.length === 0) {
+          return res.status(400).json({ message: "Le panier est vide." });
+      }
 
       const lineItems = cart.map((item) => ({
           price_data: {
@@ -24,23 +30,27 @@ router.post("/", async (req, res) => {
           },
           quantity: item.quantity,
       }));
-
+   
       const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"],
           line_items: lineItems,
           mode: "payment",
-          success_url: "http://localhost:3000/success",
-          cancel_url: "http://localhost:3000/cart",
-          customer_email: customerEmail,
+          success_url: "http://localhost:3001/success?session_id={CHECKOUT_SESSION_ID}",
+          cancel_url: "http://localhost:3001/cart",
+          customer_email: req.user.email, // Utilisation de l'email de l'utilisateur connecté
       });
 
       console.log("✅ Session Stripe créée :", session.id);
 
+      // Calculer le montant total de la commande
+      const totalAmount = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
       // Enregistrer la commande en "pending"
       const newOrder = new Order({
-          stripeSessionId: session.id, // Vérifier cet ID
-          customerEmail: customerEmail,
-          totalAmount: session.amount_total / 100,
+          userId: req.user.userId, // Lier la commande à l'utilisateur connecté
+          stripeSessionId: session.id,
+          customerEmail: req.user.email,
+          totalAmount,
           status: "pending",
           products: cart.map((item) => ({
               name: item.name,

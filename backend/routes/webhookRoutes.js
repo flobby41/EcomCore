@@ -25,24 +25,18 @@ router.post("/", express.raw({ type: "application/json" }), async (req, res) => 
 
   if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      console.log("🔎 Vérification du webhook session ID:", session.id);
+      console.log("🔍 Session ID reçu dans webhook:", session.id);
 
-      // Afficher toutes les commandes stockées
-      const allOrders = await Order.find();
-      console.log("📌 Toutes les commandes enregistrées :", allOrders);
-
-      // Rechercher la commande qui correspond à la session Stripe
       const order = await Order.findOne({ stripeSessionId: session.id });
-      console.log("📌 Liste des commandes enregistrées dans MongoDB :", allOrders.map(order => order.stripeSessionId));
-
+      console.log("🔍 Recherche commande avec stripeSessionId:", session.id);
+      console.log("📦 Commande trouvée:", order);
 
       if (order) {
-          console.log("✅ Commande trouvée, mise à jour en 'paid'.");
           order.status = "paid";
           await order.save();
-          console.log("✅ Commande mise à jour :", order);
+          console.log("✅ Commande mise à jour comme payée:", order._id);
       } else {
-          console.error("❌ Aucune commande trouvée pour la session :", session.id);
+          console.error("❌ Commande non trouvée pour session:", session.id);
       }
   }
 

@@ -2,6 +2,18 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 
+
+// Route pour récupérer les produits phares (limités à 6 par exemple)
+router.get("/featured", async (req, res) => {
+  try {
+      const products = await Product.find().limit(6); // Récupère les 6 premiers produits
+      res.json(products);
+  } catch (error) {
+      console.error("Erreur lors de la récupération des produits :", error);
+      res.status(500).json({ message: "Erreur lors de la récupération du produit", error });
+  }
+});
+
 // ➤ Ajouter un produit (POST /api/products)
 router.post("/", async (req, res) => {
     try {
@@ -56,5 +68,7 @@ router.delete("/:id", async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la suppression du produit", error });
     }
 });
+
+
 
 module.exports = router;

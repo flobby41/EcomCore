@@ -1,13 +1,16 @@
 // backend/server.js
 const express = require("express");
 const cors = require("cors");
-const authRoutes = require("./routes/authRoutes");
 const shopifyRoutes = require("./routes/shopifyRoutes");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const productRoutes = require("./routes/productRoutes");
 const checkoutRoutes = require("./routes/checkoutRoutes");
 const webhookRoutes = require("./routes/webhookRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const authRoutes = require("./routes/authRoutes").router;
+
+
 
 dotenv.config();
 
@@ -20,6 +23,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/shopify", shopifyRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/auth", authRoutes);
 
 // Connexion à MongoDB Atlas avec Mongoose
 mongoose.connect(process.env.MONGO_URI)
