@@ -6,11 +6,24 @@ const router = express.Router();
 // Route protégée pour récupérer les commandes du user connecté
 router.get("/", authMiddleware, async (req, res) => {
     try {
-        const orders = await Order.find({ userId: req.user.userId, status: "paid" });
+        console.log("👤 Recherche des commandes pour email:", req.user.email);
+        
+        // Recherche par email au lieu de userId
+        const orders = await Order.find({ 
+            customerEmail: req.user.email,
+            status: "paid" 
+        });
+        
+        console.log("🔍 Critères de recherche:", {
+            customerEmail: req.user.email,
+            status: "paid"
+        });
+        console.log("📦 Commandes filtrées trouvées:", orders);
 
         res.json(orders);
+
     } catch (error) {
-        console.error("Erreur lors de la récupération des commandes :", error);
+        console.error("❌ Erreur:", error);
         res.status(500).json({ message: "Erreur serveur" });
     }
 });

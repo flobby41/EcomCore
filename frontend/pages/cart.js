@@ -1,37 +1,51 @@
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { useCart } from "../context/CartContext";
 import Link from "next/link";
-import { loadStripe } from "@stripe/stripe-js";
-
-const stripePromise = loadStripe("pk_test_xxxx"); // Remplace avec ta clé publique Stripe
 
 export default function CartPage() {
     const { cart, removeFromCart, updateQuantity } = useCart();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const router = useRouter();
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            router.push("/login"); // 🔥 Redirige si pas connecté
+            return;
+        }
+
+        setIsAuthenticated(true); // ✅ L'utilisateur est authentifié
+    }, [router]);
 
     const handleCheckout = async () => {
-      const stripe = await stripePromise;
-  
-      // Simule un email (à remplacer par l'email du user connecté si tu as un système d'auth)
-      const customerEmail = "test@example.com";  
-  
-      const response = await fetch("http://localhost:5001/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cart, customerEmail }),
-      });
-  
-      if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Erreur API Checkout :", errorData);
-          alert(`Erreur : ${errorData.message}`);
-          return;
-      }
-  
-      const session = await response.json();
-      console.log("🛒 Session Stripe générée :", session.id);  // DEBUG
-      if (session.url) {
-        window.location.href = session.url;
-    }
-  };
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Vous devez être connecté pour passer une commande.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:5001/api/checkout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": token, // ✅ Ajout du token dans l'en-tête
+                },
+                body: JSON.stringify({ cart }),
+            });
+
+            if (!response.ok) throw new Error("Erreur lors de la création de la session Stripe");
+
+            const data = await response.json();
+            window.location.href = data.url; // ✅ Redirection vers Stripe Checkout
+        } catch (error) {
+            console.error(error);
+            alert("Une erreur est survenue lors du paiement.");
+        }
+    };
 
     return (
         <div className="container mx-auto p-6">
@@ -66,12 +80,14 @@ export default function CartPage() {
                             </div>
                         ))}
                     </div>
-                    <button 
-                        onClick={handleCheckout}
-                        className="mt-6 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition"
-                    >
-                        Payer avec Stripe 💳
-                    </button>
+                    {isAuthenticated && (
+                        <button 
+                            onClick={handleCheckout}
+                            className="mt-6 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition"
+                        >
+                            Payer avec Stripe 💳
+                        </button>
+                    )}
                 </div>
             )}
         </div>

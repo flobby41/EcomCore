@@ -17,7 +17,12 @@ dotenv.config();
 const app = express();
 app.use("/api/webhook", webhookRoutes);
 
-app.use(cors());
+// Configuration CORS
+app.use(cors({
+    origin: 'http://localhost:3001', // URL de votre frontend
+    credentials: true, // Pour permettre l'envoi de cookies
+}));
+
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/shopify", shopifyRoutes);
