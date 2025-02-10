@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from "react";
+import toast from 'react-hot-toast';
 
 // Création du contexte
 const CartContext = createContext();
@@ -20,31 +21,49 @@ export const CartProvider = ({ children }) => {
 
     // Sauvegarder le panier dans localStorage à chaque changement
     useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cart));
+        if (cart.length > 0) {
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
     }, [cart]);
 
     // Ajouter un produit au panier
     const addToCart = (product) => {
-        setCart((prevCart) => {
-            const existingProduct = prevCart.find((p) => p._id === product._id);
-            if (existingProduct) {
-                return prevCart.map((p) =>
-                    p._id === product._id ? { ...p, quantity: p.quantity + 1 } : p
-                );
-            }
-            return [...prevCart, { ...product, quantity: 1 }];
-        });
+        const existingProduct = cart.find((p) => p._id === product._id);
+        
+        if (existingProduct) {
+            const newQuantity = existingProduct.quantity + 1;
+            setCart(prevCart => 
+                prevCart.map(p => 
+                    p._id === product._id 
+                        ? { ...p, quantity: newQuantity } 
+                        : p
+                )
+            );
+            // Notification après la mise à jour
+            setTimeout(() => {
+                toast.success(`Quantité mise à jour (${newQuantity})`);
+            }, 0);
+        } else {
+            setCart(prevCart => [...prevCart, { ...product, quantity: 1 }]);
+            // Notification après la mise à jour
+            setTimeout(() => {
+                toast.success('Produit ajouté au panier !');
+            }, 0);
+        }
     };
 
     // Supprimer un produit du panier
     const removeFromCart = (productId) => {
-        setCart((prevCart) => prevCart.filter((p) => p._id !== productId));
+        setCart(prevCart => prevCart.filter(p => p._id !== productId));
+        setTimeout(() => {
+            toast.success('Produit retiré du panier');
+        }, 0);
     };
 
     // Modifier la quantité d'un produit
     const updateQuantity = (productId, quantity) => {
-        setCart((prevCart) =>
-            prevCart.map((p) =>
+        setCart(prevCart =>
+            prevCart.map(p =>
                 p._id === productId ? { ...p, quantity } : p
             )
         );

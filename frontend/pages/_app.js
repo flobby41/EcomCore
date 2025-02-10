@@ -1,14 +1,25 @@
 import { CartProvider } from "../context/CartContext";
-import Navbar from "../components/Navbar"; // Assure-toi que le chemin est correct
+import Navbar from "../components/Navbar";
+import { Toaster } from 'react-hot-toast';
 import "../styles/globals.css";
 
-export default function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }) {
     return (
         <CartProvider>
-            <>
-                <Navbar /> {/* La Navbar sera affichée sur toutes les pages */}
-                <Component {...pageProps} />
-            </>
+            <Toaster 
+                position="top-right"
+                toastOptions={{
+                    duration: 2000,
+                    style: {
+                        background: '#333',
+                        color: '#fff',
+                    },
+                }}
+            />
+            <Navbar />
+            <Component {...pageProps} />
         </CartProvider>
     );
 }
+
+export default MyApp;

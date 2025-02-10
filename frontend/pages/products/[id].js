@@ -22,6 +22,14 @@ export default function ProductDetail() {
 
     if (loading) return <p className="text-center text-gray-500">Chargement...</p>;
 
+    const handleAddToCart = () => {
+        addToCart(product);
+        // Animation du bouton (optionnel)
+        const button = document.activeElement;
+        button.classList.add('scale-95');
+        setTimeout(() => button.classList.remove('scale-95'), 100);
+    };
+
     return (
         <div className="container mx-auto p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -31,8 +39,8 @@ export default function ProductDetail() {
                     <p className="text-gray-600 text-lg mt-4">{product.description}</p>
                     <p className="text-green-500 font-bold text-2xl mt-4">{product.price} €</p>
                     <button 
-                        onClick={() => addToCart(product)}
-                        className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition"
+                        onClick={handleAddToCart}
+                        className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition transform active:scale-95"
                     >
                         Ajouter au panier
                     </button>

@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
+    const { cart } = useCart();
+
+    // Calculer le nombre total d'articles
+    const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
     // ✅ Vérifier le token à chaque changement de page
     useEffect(() => {
@@ -35,7 +40,14 @@ export default function Navbar() {
                 <Link href="/" className="text-xl font-bold">VogueLine</Link>
                 <div>
                     <Link href="/products" className="mx-4">Produits</Link>
-                    <Link href="/cart" className="mx-4">🛒 Panier</Link>
+                    <Link href="/cart" className="mx-4 relative">
+                        🛒 Panier
+                        {itemCount > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                {itemCount}
+                            </span>
+                        )}
+                    </Link>
 
                     {isAuthenticated ? (
                         <>
