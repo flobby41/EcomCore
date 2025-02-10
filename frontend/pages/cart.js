@@ -1,95 +1,115 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { useCart } from "../context/CartContext";
-import Link from "next/link";
+import { useCart } from '../context/CartContext';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
 
-export default function CartPage() {
+export default function Cart() {
     const { cart, removeFromCart, updateQuantity } = useCart();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
+        setIsAuthenticated(!!token);
+    }, []);
 
-        if (!token) {
-            router.push("/login"); // 🔥 Redirige si pas connecté
-            return;
-        }
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-        setIsAuthenticated(true); // ✅ L'utilisateur est authentifié
-    }, [router]);
-
-    const handleCheckout = async () => {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            alert("Vous devez être connecté pour passer une commande.");
-            return;
-        }
-
-        try {
-            const response = await fetch("http://localhost:5001/api/checkout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": token, // ✅ Ajout du token dans l'en-tête
-                },
-                body: JSON.stringify({ cart }),
-            });
-
-            if (!response.ok) throw new Error("Erreur lors de la création de la session Stripe");
-
-            const data = await response.json();
-            window.location.href = data.url; // ✅ Redirection vers Stripe Checkout
-        } catch (error) {
-            console.error(error);
-            alert("Une erreur est survenue lors du paiement.");
-        }
+    const handleQuantityChange = (productId, newQuantity) => {
+        if (newQuantity < 1) return;
+        updateQuantity(productId, newQuantity);
     };
 
+    if (cart.length === 0) {
+        return (
+            <div className="container mx-auto p-4">
+                <h1 className="text-2xl font-bold mb-4">Votre panier</h1>
+                <p>Votre panier est vide</p>
+                <Link href="/products" className="text-blue-500 hover:underline">
+                    Voir nos produits
+                </Link>
+            </div>
+        );
+    }
+
     return (
-        <div className="container mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-6">🛒 Mon Panier</h1>
-            {cart.length === 0 ? (
-                <p className="text-gray-500">
-                    Votre panier est vide. <Link href="/products" className="text-blue-500">Voir les produits</Link>
-                </p>
-            ) : (
-                <div>
-                    <div className="grid gap-4">
-                        {cart.map((item) => (
-                            <div key={item._id} className="flex items-center justify-between border p-4 rounded-lg shadow">
-                                <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
-                                <div className="flex-1 ml-4">
-                                    <h2 className="text-lg font-semibold">{item.name}</h2>
-                                    <p className="text-gray-500">{item.price} €</p>
-                                    <input
-                                        type="number"
-                                        value={item.quantity}
-                                        onChange={(e) => updateQuantity(item._id, parseInt(e.target.value))}
-                                        className="w-16 border px-2 py-1 text-center"
-                                        min="1"
-                                    />
+        <div className="container mx-auto p-4">
+            <h1 className="text-2xl font-bold mb-4">Votre panier</h1>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Liste des produits */}
+                <div className="md:col-span-2 space-y-4">
+                    {cart.map((item) => (
+                        <div key={item._id} className="flex items-center justify-between border p-4 rounded">
+                            <div className="flex items-center space-x-4">
+                                <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded" />
+                                <div>
+                                    <h3 className="font-semibold">{item.name}</h3>
+                                    <p className="text-gray-600">{item.price}€</p>
                                 </div>
-                                <button
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-2">
+                                    <button 
+                                        onClick={() => handleQuantityChange(item._id, item.quantity - 1)}
+                                        className="px-2 py-1 bg-gray-200 rounded"
+                                    >
+                                        -
+                                    </button>
+                                    <span>{item.quantity}</span>
+                                    <button 
+                                        onClick={() => handleQuantityChange(item._id, item.quantity + 1)}
+                                        className="px-2 py-1 bg-gray-200 rounded"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                                <button 
                                     onClick={() => removeFromCart(item._id)}
-                                    className="text-red-500 hover:text-red-700 transition"
+                                    className="text-red-500 hover:text-red-700"
                                 >
-                                    ❌
+                                    Supprimer
                                 </button>
                             </div>
-                        ))}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Résumé et actions */}
+                <div className="bg-gray-50 p-4 rounded h-fit">
+                    <h2 className="text-xl font-semibold mb-4">Résumé</h2>
+                    <div className="space-y-2 mb-4">
+                        <div className="flex justify-between">
+                            <span>Total</span>
+                            <span className="font-bold">{total.toFixed(2)}€</span>
+                        </div>
                     </div>
-                    {isAuthenticated && (
-                        <button 
-                            onClick={handleCheckout}
-                            className="mt-6 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition"
+
+                    {isAuthenticated ? (
+                        <Link 
+                            href="/checkout" 
+                            className="w-full bg-blue-500 text-white py-2 px-4 rounded block text-center hover:bg-blue-600 transition"
                         >
-                            Payer avec Stripe 💳
-                        </button>
+                            Passer la commande
+                        </Link>
+                    ) : (
+                        <div className="space-y-2">
+                            <Link 
+                                href="/login" 
+                                className="w-full bg-blue-500 text-white py-2 px-4 rounded block text-center hover:bg-blue-600 transition"
+                            >
+                                Se connecter pour commander
+                            </Link>
+                            <Link 
+                                href="/checkout/guest" 
+                                className="w-full bg-green-500 text-white py-2 px-4 rounded block text-center hover:bg-green-600 transition"
+                            >
+                                Commander en tant qu'invité
+                            </Link>
+                        </div>
                     )}
                 </div>
-            )}
+            </div>
         </div>
     );
 }
