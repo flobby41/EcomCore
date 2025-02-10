@@ -2,6 +2,7 @@ const express = require("express");
 const Order = require("../models/Order");
 const authMiddleware = require("../middleware/authMiddleware"); // Ajout du middleware
 const router = express.Router();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Route protégée pour récupérer les commandes du user connecté
 router.get("/", authMiddleware, async (req, res) => {
@@ -47,6 +48,57 @@ router.get("/verify-payment", authMiddleware, async (req, res) => {
     } catch (error) {
         console.error("❌ Erreur:", error);
         res.status(500).json({ status: 'error' });
+    }
+});
+
+// Route pour les commandes invités
+router.post("/guest", async (req, res) => {
+    try {
+        const { email, products, totalAmount } = req.body;
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+        // Créer la session Stripe
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: products.map(product => ({
+                price_data: {
+                    currency: 'eur',
+                    product_data: {
+                        name: product.name,
+                    },
+                    unit_amount: Math.round(product.price * 100),
+                },
+                quantity: product.quantity,
+            })),
+            mode: 'payment',
+            success_url: `${frontendUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${frontendUrl}/cart`,
+            customer_email: email,
+        });
+
+        // Créer la commande
+        const order = new Order({
+            customerEmail: email,
+            products: products.map(p => ({
+                productId: p._id,
+                quantity: p.quantity,
+                price: p.price
+            })),
+            totalAmount,
+            stripeSessionId: session.id,
+            status: 'pending'
+        });
+
+        await order.save();
+
+        res.json({ url: session.url });
+
+    } catch (error) {
+        console.error('Erreur:', error);
+        res.status(500).json({ 
+            message: "Erreur lors de la création de la commande",
+            error: error.message 
+        });
     }
 });
 

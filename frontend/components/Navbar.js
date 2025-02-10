@@ -64,6 +64,14 @@ export default function Navbar() {
                         <>
                             <Link href="/login" className="mx-4">Se Connecter</Link>
                             <Link href="/register" className="mx-4">S'inscrire</Link>
+                            {itemCount > 0 && (
+                                <Link 
+                                    href="/checkout/guest" 
+                                    className="mx-4 bg-green-500 px-4 py-2 rounded hover:bg-green-600 transition"
+                                >
+                                    Commander en tant qu'invité
+                                </Link>
+                            )}
                         </>
                     )}
                 </div>
