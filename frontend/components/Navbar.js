@@ -6,7 +6,7 @@ import { useCart } from "../context/CartContext";
 export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
-    const { cart } = useCart();
+    const { cart, clearCart } = useCart();
 
     // Calculer le nombre total d'articles
     const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -29,9 +29,10 @@ export default function Navbar() {
     }, [router.events]);
 
     const handleLogout = () => {
-        localStorage.removeItem("token"); // ✅ Supprime le token
+        localStorage.removeItem("token");
+        clearCart(); // Vide le panier à la déconnexion
         setIsAuthenticated(false);
-        router.push("/login"); // ✅ Redirige vers la page de connexion
+        router.push("/login");
     };
 
     return (
