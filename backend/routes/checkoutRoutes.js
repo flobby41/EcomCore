@@ -128,4 +128,83 @@ router.post('/create-guest-session', async (req, res) => {
     }
 });
 
+// ✅ Route pour créer une session de paiement pour utilisateur connecté
+router.post('/create-session', authMiddleware, async (req, res) => {
+    try {
+        console.log("📦 Requête reçue - Body:", req.body);
+        console.log("👤 Utilisateur:", req.user);
+
+        const { items } = req.body;
+        
+        if (!items || items.length === 0) {
+            console.log("❌ Panier vide");
+            return res.status(400).json({ message: "Le panier est vide" });
+        }
+
+        // Récupérer l'utilisateur complet depuis la base de données
+        const User = require('../models/User');
+        const user = await User.findById(req.user.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé" });
+        }
+
+        // Créer la commande avec l'email de l'utilisateur
+        const order = new Order({
+            userId: req.user.id,
+            email: user.email, // ✅ Ajout de l'email
+            items: items.map(item => ({
+                productId: item._id,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            status: 'pending'
+        });
+
+        console.log("📝 Commande créée:", order);
+
+        // Créer les line_items pour Stripe
+        const line_items = items.map(item => ({
+            price_data: {
+                currency: 'eur',
+                product_data: {
+                    name: item.name || 'Produit',
+                    images: [item.image].filter(Boolean)
+                },
+                unit_amount: Math.round(item.price * 100),
+            },
+            quantity: item.quantity,
+        }));
+
+        console.log("💳 Line items pour Stripe:", line_items);
+
+        // Créer la session Stripe
+        const session = await stripe.checkout.sessions.create({
+            line_items,
+            mode: 'payment',
+            success_url: req.body.success_url,
+            cancel_url: req.body.cancel_url,
+            client_reference_id: req.user.id,
+            metadata: {
+                orderId: order._id.toString()
+            }
+        });
+
+        // Sauvegarder l'ID de session Stripe
+        order.stripeSessionId = session.id;
+        await order.save();
+
+        console.log("✅ Session créée:", session.id);
+        
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error("❌ Erreur détaillée:", error);
+        res.status(500).json({ 
+            message: "Erreur lors de la création de la session",
+            error: error.message,
+            stack: error.stack
+        });
+    }
+});
+
 module.exports = router;
