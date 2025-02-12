@@ -102,4 +102,40 @@ router.post("/guest", async (req, res) => {
     }
 });
 
+// ✅ Nouvelle route pour vérifier le paiement des invités (sans authentification)
+router.get('/verify-guest-payment', async (req, res) => {
+    try {
+        const { session_id } = req.query;
+        
+        console.log("🔍 Vérification paiement invité - Session ID:", session_id);
+
+        if (!session_id) {
+            return res.status(400).json({ message: "Session ID manquant" });
+        }
+
+        const order = await Order.findOne({ 
+            stripeSessionId: session_id,
+            isGuestOrder: true // ✅ S'assurer que c'est bien une commande invité
+        });
+
+        console.log("📦 Commande trouvée:", order);
+
+        if (!order) {
+            return res.status(404).json({ message: "Commande non trouvée" });
+        }
+
+        res.json({ 
+            status: order.status,
+            orderId: order._id 
+        });
+
+    } catch (error) {
+        console.error("❌ Erreur lors de la vérification du paiement invité:", error);
+        res.status(500).json({ 
+            message: "Erreur lors de la vérification du paiement",
+            error: error.message 
+        });
+    }
+});
+
 module.exports = router;

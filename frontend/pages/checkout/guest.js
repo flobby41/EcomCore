@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useCart } from '../../context/CartContext';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 export default function GuestCheckout() {
@@ -16,15 +17,16 @@ export default function GuestCheckout() {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5001/api/orders/guest', {
-                method: 'POST',
+            const response = await fetch("http://localhost:5001/api/checkout/create-guest-session", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    email,
-                    products: cart,
-                    totalAmount: total
+                    items: cart,
+                    email: email,
+                    success_url: `${window.location.origin}/success?guest=true&session_id={CHECKOUT_SESSION_ID}`,
+                    cancel_url: `${window.location.origin}/cart`,
                 }),
             });
 

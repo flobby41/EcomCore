@@ -4,43 +4,44 @@ const dotenv = require("dotenv");
 const Order = require("../models/Order");
 
 dotenv.config();
-const router = express.Router();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ➤ Webhook Stripe (écoute les paiements)
-router.post("/", express.raw({ type: "application/json" }), async (req, res) => {
-  const sig = req.headers["stripe-signature"];
-  let event;
+// ✅ Exporter le gestionnaire directement
+const handleWebhook = async (req, res) => {
+    console.log("🎯 Webhook reçu");
+    const sig = req.headers["stripe-signature"];
+    console.log("🔑 Signature:", sig);
 
-  try {
-      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-      console.error("❌ Erreur Webhook :", err);
-      return res.status(400).json({ message: "Webhook signature error", error: err.message });
-  }
+    let event;
 
-  console.log("✅ Webhook Stripe reçu :", event.type);
-  console.log("📩 Données envoyées par Stripe :", JSON.stringify(event, null, 2));
-  
+    try {
+        event = stripe.webhooks.constructEvent(
+            req.body, 
+            sig, 
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+        console.log("✅ Événement construit:", event.type);
 
-  if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-      console.log("🔍 Session ID reçu dans webhook:", session.id);
+        if (event.type === "checkout.session.completed") {
+            const session = event.data.object;
+            console.log("💳 Session complétée:", session.id);
 
-      const order = await Order.findOne({ stripeSessionId: session.id });
-      console.log("🔍 Recherche commande avec stripeSessionId:", session.id);
-      console.log("📦 Commande trouvée:", order);
+            const order = await Order.findOne({ stripeSessionId: session.id });
+            if (order) {
+                console.log("📦 Commande avant mise à jour:", order);
+                order.status = "paid";
+                await order.save();
+                console.log("✅ Commande après mise à jour:", order);
+            } else {
+                console.log("❌ Commande non trouvée pour la session:", session.id);
+            }
+        }
 
-      if (order) {
-          order.status = "paid";
-          await order.save();
-          console.log("✅ Commande mise à jour comme payée:", order._id);
-      } else {
-          console.error("❌ Commande non trouvée pour session:", session.id);
-      }
-  }
+        res.json({ received: true });
+    } catch (err) {
+        console.error("❌ Erreur webhook:", err);
+        return res.status(400).json({ error: err.message });
+    }
+};
 
-  res.json({ received: true });
-});
-
-module.exports = router;
+module.exports = { handleWebhook };

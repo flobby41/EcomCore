@@ -7,11 +7,14 @@ export default function SuccessPage() {
     const [status, setStatus] = useState('loading');
 
     useEffect(() => {
-        // Attendre que le router soit prêt
         if (!router.isReady) return;
 
         const sessionId = router.query.session_id;
+        const isGuest = router.asPath.includes('guest=true');
+        
+        console.log("🔍 URL complète:", router.asPath);
         console.log("🔍 Session ID from URL:", sessionId);
+        console.log("👤 Guest checkout:", isGuest);
 
         if (!sessionId) {
             console.log("❌ Pas de session_id dans l'URL");
@@ -20,18 +23,33 @@ export default function SuccessPage() {
 
         const verifyPayment = async () => {
             try {
+                // Construire l'URL en fonction du type d'utilisateur
+                const baseUrl = 'http://localhost:5001/api/orders';
+                const url = isGuest 
+                    ? `${baseUrl}/verify-guest-payment?session_id=${sessionId}`
+                    : `${baseUrl}/verify-payment?session_id=${sessionId}`;
+
+                console.log("🌐 URL de vérification:", url);
+
                 const token = localStorage.getItem('token');
-                const response = await fetch(`http://localhost:5001/api/orders/verify-payment?session_id=${sessionId}`, {
-                    headers: {
-                        'Authorization': token
-                    }
-                });
+                const headers = token 
+                    ? { 'Authorization': `Bearer ${token}` }
+                    : {};
+
+                console.log("🔑 Headers envoyés:", headers);
+
+                const response = await fetch(url, { headers });
 
                 console.log("📡 Réponse status:", response.status);
                 const data = await response.json();
                 console.log("📦 Données reçues:", data);
 
-                setStatus(data.status === 'paid' ? 'success' : 'pending');
+                if (response.ok) {
+                    setStatus(data.status === 'paid' ? 'success' : 'pending');
+                } else {
+                    console.error("❌ Erreur serveur:", data.message);
+                    setStatus('error');
+                }
             } catch (error) {
                 console.error("❌ Erreur:", error);
                 setStatus('error');
@@ -39,7 +57,7 @@ export default function SuccessPage() {
         };
 
         verifyPayment();
-    }, [router.isReady, router.query]); // Ajout de router.isReady dans les dépendances
+    }, [router.isReady, router.query]);
 
     return (
         <div className="container mx-auto p-6 text-center">
@@ -54,8 +72,8 @@ export default function SuccessPage() {
                 <div>
                     <h1 className="text-3xl font-bold text-green-600 mb-4">🎉 Paiement réussi !</h1>
                     <p className="mb-6">Votre commande a été confirmée.</p>
-                    <Link href="/orders" className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
-                        Voir mes commandes
+                    <Link href="/products" className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                        Retour aux produits
                     </Link>
                 </div>
             )}
@@ -64,8 +82,8 @@ export default function SuccessPage() {
                 <div>
                     <h1 className="text-2xl font-bold text-red-600 mb-4">Une erreur est survenue</h1>
                     <p className="mb-4">La vérification du paiement a échoué.</p>
-                    <Link href="/cart" className="text-blue-500 hover:underline">
-                        Retourner au panier
+                    <Link href="/products" className="text-blue-500 hover:underline">
+                        Retour aux produits
                     </Link>
                 </div>
             )}

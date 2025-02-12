@@ -1,19 +1,45 @@
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
-    stripeSessionId: { type: String, required: true, unique: true },
-    customerEmail: { type: String, required: true },
-    totalAmount: { type: Number, required: true },
-    status: { type: String, default: "pending" }, // "pending", "paid", "shipped"
-    products: [
-        {
-            name: String,
-            price: Number,
-            quantity: Number,
-            image: String
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User',
+        required: false // ✅ Optionnel pour les commandes invités
+    },
+    email: { 
+        type: String, 
+        required: true // ✅ Email requis pour tous
+    },
+    items: [{
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true
+        },
+        quantity: {
+            type: Number,
+            required: true
+        },
+        price: {
+            type: Number,
+            required: true
         }
-    ],
-    createdAt: { type: Date, default: Date.now }
+    }],
+    status: {
+        type: String,
+        enum: ['pending', 'paid', 'cancelled'],
+        default: 'pending'
+    },
+    stripeSessionId: {
+        type: String,
+        required: true
+    },
+    isGuestOrder: { // ✅ Nouveau champ pour identifier les commandes invités
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model("Order", orderSchema);

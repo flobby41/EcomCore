@@ -71,4 +71,61 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 });
 
+// ✅ Nouvelle route pour la création de session invité
+router.post('/create-guest-session', async (req, res) => {
+    try {
+        const { items, email } = req.body;
+
+        if (!items || !items.length) {
+            return res.status(400).json({ message: "Le panier est vide" });
+        }
+
+        // Créer la commande pour l'invité
+        const order = new Order({
+            email,
+            items: items.map(item => ({
+                productId: item._id,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            status: 'pending',
+            isGuestOrder: true // ✅ Marquer comme commande invité
+        });
+
+        // Créer les line_items pour Stripe
+        const line_items = items.map(item => ({
+            price_data: {
+                currency: 'eur',
+                product_data: {
+                    name: item.name,
+                    images: [item.image]
+                },
+                unit_amount: Math.round(item.price * 100),
+            },
+            quantity: item.quantity,
+        }));
+
+        // Créer la session Stripe
+        const session = await stripe.checkout.sessions.create({
+            line_items,
+            mode: 'payment',
+            success_url: req.body.success_url,
+            cancel_url: req.body.cancel_url,
+            customer_email: email, // ✅ Pré-remplir l'email
+        });
+
+        // Mettre à jour la commande avec l'ID de session Stripe
+        order.stripeSessionId = session.id;
+        await order.save();
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error("❌ Erreur création session invité:", error);
+        res.status(500).json({ 
+            message: "Erreur lors de la création de la session",
+            error: error.message 
+        });
+    }
+});
+
 module.exports = router;

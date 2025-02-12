@@ -15,11 +15,13 @@ export const CartProvider = ({ children }) => {
         const token = localStorage.getItem("token");
         if (token) {
             try {
+                const headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                };
+
                 const response = await fetch("http://localhost:5001/api/cart", {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    }
+                    headers
                 });
 
                 if (response.ok) {
@@ -37,7 +39,7 @@ export const CartProvider = ({ children }) => {
                 console.error("Erreur lors du chargement du panier:", error);
             }
         } else {
-            // Charger le panier local pour les invités
+            // Pour les invités, ne pas envoyer d'en-tête Authorization du tout
             const savedCart = localStorage.getItem("cart");
             if (savedCart) {
                 setCart(JSON.parse(savedCart));
