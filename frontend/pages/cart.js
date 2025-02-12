@@ -4,15 +4,14 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 
 export default function Cart() {
-  const { cart, removeFromCart, updateQuantity, fetchCart } = useCart(); // ✅ Ajout de fetchCart
+  const { cart, removeFromCart, updateQuantity, loadCart } = useCart(); // ✅ Changé fetchCart en loadCart
   const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         setIsAuthenticated(!!token);
-        fetchCart(); // Charge le panier dès le démarrage
-
+        loadCart(); // ✅ Changé fetchCart en loadCart
     }, []);
 
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);

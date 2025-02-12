@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { useCart } from "../context/CartContext";
+import toast from 'react-hot-toast';
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
     const router = useRouter();
+    const { loadCart } = useCart();
 
-    const handleLogin = async (e) => {
-        e.preventDefault(); // ✅ Correction ici : e.preventDefault() fonctionne maintenant correctement
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
 
         try {
             const response = await fetch("http://localhost:5001/api/auth/login", {
@@ -19,26 +24,26 @@ export default function Login() {
             });
 
             const data = await response.json();
-            console.log("📦 Réponse login:", data);
 
-            if (data.token) {
-                // ✅ Correction : stockage correct du token
+            if (response.ok) {
                 localStorage.setItem("token", data.token);
-
-                // Redirection après connexion
-                router.push("/");
+                await loadCart();
+                toast.success('Connexion réussie !');
+                router.push("/products");
             } else {
-                console.error("❌ Erreur: Aucun token reçu");
+                setError(data.message || "Erreur lors de la connexion");
+                toast.error(data.message || "Erreur lors de la connexion");
             }
         } catch (error) {
-            console.error("❌ Erreur login:", error);
+            setError("Erreur lors de la connexion");
+            toast.error("Erreur lors de la connexion");
         }
     };
 
     return (
         <div>
             <h1>Connexion</h1>
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleSubmit}>
                 <input 
                     type="email" 
                     placeholder="Email" 

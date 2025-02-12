@@ -6,7 +6,7 @@ import { useCart } from "../context/CartContext";
 export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
-    const { cart, clearCart, addToCart, fetchCart } = useCart(); // ✅ Déplacer useCart ici
+    const { cart, clearCart, addToCart, loadCart } = useCart(); // ✅ Changé fetchCart en loadCart
 
     useEffect(() => {
         const checkAuth = () => {
@@ -15,7 +15,7 @@ export default function Navbar() {
         };
 
         checkAuth(); // Vérification au chargement
-        fetchCart();
+        loadCart(); // ✅ Changé fetchCart en loadCart
         // Écoute chaque changement d'URL et met à jour `isAuthenticated`
         router.events?.on("routeChangeComplete", checkAuth);
 
@@ -31,7 +31,7 @@ export default function Navbar() {
         localStorage.setItem("token", token);
         setIsAuthenticated(true);
         console.log("🔄 Rafraîchissement du panier après connexion...");
-        await fetchCart(); // ✅ Recharge le panier immédiatement après connexion
+        await loadCart(); // ✅ Changé fetchCart en loadCart
 
         const localCart = JSON.parse(localStorage.getItem("cart")) || [];
         if (localCart.length > 0) {
@@ -54,7 +54,7 @@ export default function Navbar() {
 
     const handleLogout = () => {
         localStorage.removeItem("token");
-        clearCart(); // Vide le panier à la déconnexion
+        clearCart(false); // Passer false pour ne pas afficher le toast
         setIsAuthenticated(false);
         router.push("/login");
     };
