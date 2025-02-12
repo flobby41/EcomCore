@@ -5,7 +5,7 @@ import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }) {
     return (
-        <CartProvider>
+        <CartProvider> {/* ✅ Encapsule toute l'application */}
             <Toaster 
                 position="top-right"
                 toastOptions={{
@@ -16,7 +16,7 @@ function MyApp({ Component, pageProps }) {
                     },
                 }}
             />
-            <Navbar />
+            <Navbar /> {/* ✅ Navbar DOIT être dans CartProvider pour utiliser useCart() */}
             <Component {...pageProps} />
         </CartProvider>
     );

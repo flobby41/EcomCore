@@ -25,8 +25,8 @@ export default function Orders() {
                 console.log("📡 Envoi requête...");
                 const response = await fetch("http://localhost:5001/api/orders", {
                     headers: {
-                        "Authorization": token,
-                        "Content-Type": "application/json"
+                      "Authorization": `Bearer ${token}`, 
+                      "Content-Type": "application/json"
                     }
                 });
 

@@ -6,12 +6,8 @@ import { useCart } from "../context/CartContext";
 export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
-    const { cart, clearCart } = useCart();
+    const { cart, clearCart, addToCart, fetchCart } = useCart(); // ✅ Déplacer useCart ici
 
-    // Calculer le nombre total d'articles
-    const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-
-    // ✅ Vérifier le token à chaque changement de page
     useEffect(() => {
         const checkAuth = () => {
             const token = localStorage.getItem("token");
@@ -19,14 +15,42 @@ export default function Navbar() {
         };
 
         checkAuth(); // Vérification au chargement
-
-        // 🔥 Écoute chaque changement d'URL et met à jour `isAuthenticated`
+        fetchCart();
+        // Écoute chaque changement d'URL et met à jour `isAuthenticated`
         router.events?.on("routeChangeComplete", checkAuth);
 
         return () => {
             router.events?.off("routeChangeComplete", checkAuth);
         };
     }, [router.events]);
+
+    // 🔥 Fusionner le panier local avec le backend après connexion
+    const handleLogin = async (token) => {
+        if (!token) return;
+
+        localStorage.setItem("token", token);
+        setIsAuthenticated(true);
+        console.log("🔄 Rafraîchissement du panier après connexion...");
+        await fetchCart(); // ✅ Recharge le panier immédiatement après connexion
+
+        const localCart = JSON.parse(localStorage.getItem("cart")) || [];
+        if (localCart.length > 0) {
+            try {
+                await fetch("http://localhost:5001/api/cart/merge", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ items: localCart })
+                });
+
+                localStorage.removeItem("cart"); // ✅ Nettoie le panier local après la fusion
+            } catch (error) {
+                console.error("Erreur lors de la fusion du panier:", error);
+            }
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -43,9 +67,9 @@ export default function Navbar() {
                     <Link href="/products" className="mx-4">Produits</Link>
                     <Link href="/cart" className="mx-4 relative">
                         🛒 Panier
-                        {itemCount > 0 && (
+                        {cart.length > 0 && (
                             <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                                {itemCount}
+                                {cart.reduce((total, item) => total + item.quantity, 0)}
                             </span>
                         )}
                     </Link>
@@ -64,7 +88,7 @@ export default function Navbar() {
                         <>
                             <Link href="/login" className="mx-4">Se Connecter</Link>
                             <Link href="/register" className="mx-4">S'inscrire</Link>
-                            {itemCount > 0 && (
+                            {cart.length > 0 && (
                                 <Link 
                                     href="/checkout/guest" 
                                     className="mx-4 bg-green-500 px-4 py-2 rounded hover:bg-green-600 transition"

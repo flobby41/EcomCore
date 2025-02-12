@@ -7,7 +7,8 @@ export default function Login() {
     const router = useRouter();
 
     const handleLogin = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // ✅ Correction ici : e.preventDefault() fonctionne maintenant correctement
+
         try {
             const response = await fetch("http://localhost:5001/api/auth/login", {
                 method: "POST",
@@ -21,11 +22,13 @@ export default function Login() {
             console.log("📦 Réponse login:", data);
 
             if (data.token) {
-                // Stockage du token avec le préfixe "Bearer"
-                localStorage.setItem("token", `Bearer ${data.token}`);
-                // ou sans le préfixe si vous préférez l'ajouter dans les requêtes
-                // localStorage.setItem("token", data.token);
+                // ✅ Correction : stockage correct du token
+                localStorage.setItem("token", data.token);
+
+                // Redirection après connexion
                 router.push("/");
+            } else {
+                console.error("❌ Erreur: Aucun token reçu");
             }
         } catch (error) {
             console.error("❌ Erreur login:", error);
@@ -36,8 +39,20 @@ export default function Login() {
         <div>
             <h1>Connexion</h1>
             <form onSubmit={handleLogin}>
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                <input type="password" placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <input 
+                    type="email" 
+                    placeholder="Email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)} 
+                    required 
+                />
+                <input 
+                    type="password" 
+                    placeholder="Mot de passe" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    required 
+                />
                 <button type="submit">Se connecter</button>
             </form>
         </div>
