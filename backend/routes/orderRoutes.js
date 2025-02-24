@@ -4,7 +4,7 @@ const authMiddleware = require("../middleware/authMiddleware"); // Ajout du midd
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// Route protégée pour récupérer les commandes du user connecté
+// /api/orders Route protégée pour récupérer les commandes du user connecté
 router.get("/", authMiddleware, async (req, res) => {
     try {
         console.log("👤 Recherche des commandes pour email:", req.user.email);
