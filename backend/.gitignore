@@ -1,0 +1,37 @@
+.env
+# Ignorer les fichiers d'environnement
+**/.env
+backend/.env
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Ignorer le dossier node_modules
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Ignorer les fichiers de logs
+logs
+*.log
+logs/
+*.out
+*.err
+
+# Ignorer les fichiers de build
+dist/
+build/
+.cache/
+out/
+.next/
+.vscode/
+
+# Ignorer les fichiers système
+.DS_Store
+Thumbs.db
+
+notes flo/
+log.md
