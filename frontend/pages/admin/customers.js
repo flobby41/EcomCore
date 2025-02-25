@@ -43,6 +43,70 @@ export default function CustomersAdmin() {
         }
     };
 
+    const handleDelete = async (customerId) => {
+        if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+            return;
+        }
+
+        try {
+            const adminToken = Cookies.get('adminToken');
+            const response = await fetch(`http://localhost:5001/api/admin/users/${customerId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la suppression du client');
+            }
+
+            setCustomers(customers.filter(customer => customer._id !== customerId));
+        } catch (error) {
+            console.error('Erreur:', error);
+            setError(error.message);
+        }
+    };
+
+    const handleEdit = async (customerId) => {
+        try {
+            const customer = customers.find(c => c._id === customerId);
+            if (!customer) return;
+
+            const newName = window.prompt('Nouveau nom:', customer.name);
+            const newEmail = window.prompt('Nouvel email:', customer.email);
+
+            if (!newName || !newEmail) return;
+
+            const adminToken = Cookies.get('adminToken');
+            const response = await fetch(`http://localhost:5001/api/admin/users/${customerId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${adminToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: newName,
+                    email: newEmail
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur lors de la modification du client');
+            }
+
+            const updatedCustomer = await response.json();
+            
+            setCustomers(customers.map(c => 
+                c._id === customerId ? updatedCustomer : c
+            ));
+        } catch (error) {
+            console.error('Erreur:', error);
+            setError(error.message);
+        }
+    };
+
     if (loading) return (
         <AdminLayout>
             <div className="container mx-auto px-6 py-8">
