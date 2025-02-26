@@ -27,7 +27,7 @@ router.post("/register", async (req, res) => {
       const token = jwt.sign({ userId: newUser._id, email: newUser.email }, process.env.JWT_SECRET, {
           expiresIn: "7d",
       });
-console.log('le token a bien été crée lors de l enregistrement : ', token)
+
       res.status(201).json({ message: "Utilisateur créé avec succès", token });
   } catch (error) {
       console.error(error);
