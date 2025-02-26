@@ -21,7 +21,7 @@ router.post("/register", async (req, res) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = new User({ name, email, password: hashedPassword });
+      const newUser = new User({ name, email: email.toLowerCase(), password: hashedPassword });
       await newUser.save();
 
       const token = jwt.sign({ userId: newUser._id, email: newUser.email }, process.env.JWT_SECRET, {
@@ -36,30 +36,37 @@ router.post("/register", async (req, res) => {
 });
 
 // Connexion (Login)
-router.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  try {
+      console.log("⏳ Tentative de connexion avec :", email);
+      
+      const user = await User.findOne({ email });
+      if (!user) {
+          console.log("❌ Aucun utilisateur trouvé avec cet email.");
+          return res.status(400).json({ message: "Invalid credentials" });
+      }
 
-        // Vérifier si l'utilisateur existe
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "Identifiants invalides." });
-        }
+      console.log("✅ Utilisateur trouvé :", user.email);
+      console.log("Mot de passe entré :", password);
+      console.log("Mot de passe stocké en base :", user.password);
+      
+      const isMatch = await bcrypt.compare(password, user.password);
+      console.log("Résultat de bcrypt.compare():", isMatch);
 
-        // Vérifier le mot de passe
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Identifiants invalides." });
-        }
+      if (!isMatch) {
+          console.log("❌ Mot de passe incorrect.");
+          return res.status(400).json({ message: "Invalid credentials" });
+      }
 
-        // Générer un token JWT
-        const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+      console.log("✅ Connexion réussie !");
+      res.status(200).json({ message: "Login successful", user });
 
-        res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
-    } catch (error) {
-        console.error("Erreur lors de la connexion :", error);
-        res.status(500).json({ message: "Erreur serveur" });
-    }
+  } catch (err) {
+      console.error("❌ Erreur serveur :", err);
+      res.status(500).json({ message: "Server error" });
+  }
 });
 
 // Middleware pour protéger les routes

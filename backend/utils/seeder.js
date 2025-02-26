@@ -55,20 +55,21 @@ const generateUsers = async (count = 10) => {
     }
   }
 
-  // Ajout d'un utilisateur test avec des identifiants connus
-  const testUserPassword = "Test@1234";
-  const hashedTestPassword = await bcrypt.hash(testUserPassword, 10);
-  console.log(`Test User - Email: john@example.com | Password: ${testUserPassword} | Hashed: ${hashedTestPassword}`);
-  users.push({
-    name: "John Doe",
-    email: "john@example.com",
-    password: hashedTestPassword,
+  // Ajout d'un utilisateur test avec un mot de passe haché
+const testUserPassword = "Test@1234";
+const hashedTestPassword = await bcrypt.hash(testUserPassword, 10);
+
+console.log(`Test User - Email: test@example.com | Password: ${testUserPassword} | Hashed: ${hashedTestPassword}`);
+
+users.push({
+    name: "Test User",
+    email: "test@example.com",
+    password: hashedTestPassword, // 🔥 Stocke le mot de passe haché
     address: "123 Main Street",
     city: "Test City",
     country: "Test Country",
-    rawPassword: testUserPassword, // Pour debug
-  });
-
+    rawPassword: testUserPassword, // Debug seulement
+});
   return users;
 };
 
@@ -109,6 +110,11 @@ const seedDatabase = async () => {
 
     console.log('Database successfully seeded');
     console.log('Utilisateur test ajouté : Email -> john@example.com | Password -> Test@1234');
+    console.log('📢 Voici quelques utilisateurs générés avec leurs mots de passe en clair :');
+    users.slice(0, 5).forEach(user => {
+      console.log(`📧 Email: ${user.email} | 🔑 Password: ${user.rawPassword}`);
+    });
+
 
     // Vérification de tous les utilisateurs après insertion
     const allUsers = await User.find();
