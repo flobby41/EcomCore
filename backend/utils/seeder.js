@@ -2,7 +2,8 @@
 
 const mongoose = require('mongoose');
 const { faker } = require('@faker-js/faker');
-require('dotenv').config();
+const bcrypt = require('bcrypt');
+require('dotenv').config({ path: './backend/.env' });
 
 // Import des modèles
 const Product = require('../models/Product');
@@ -31,19 +32,31 @@ const generateProducts = (count = 20) => {
   return products;
 };
 
-// Fonction pour générer des utilisateurs
-const generateUsers = (count = 10) => {
-  const users = [];
-  for (let i = 0; i < count; i++) {
-    users.push({
-      name: faker.person.fullName(),
-      email: faker.internet.email(),
-      address: faker.location.streetAddress(),
-      city: faker.location.city(),
-      country: faker.location.country(),
-      password: faker.internet.password(),
-    });
-  }
+// Fonction pour générer des utilisateurs avec hachage du mot de passe
+const generateUsers = async (count = 10) => {
+  const users = await Promise.all(
+    Array.from({ length: count }).map(async () => {
+      const hashedPassword = await bcrypt.hash("Test@1234", 10); // Utilisation d'un mot de passe fixe pour test
+      return {
+        name: faker.person.fullName(),
+        email: faker.internet.email(),
+        address: faker.location.streetAddress(),
+        city: faker.location.city(),
+        country: faker.location.country(),
+        password: hashedPassword,
+      };
+    })
+  );
+
+  // Ajout d'un utilisateur test avec des identifiants connus
+  users.push({
+    name: "John Doe",
+    email: "john@example.com",
+    password: await bcrypt.hash("Test@1234", 10),
+    address: "123 Main Street",
+    city: "Test City",
+    country: "Test Country"
+  });
   return users;
 };
 
@@ -61,7 +74,7 @@ const generateOrders = (users, products, count = 15) => {
       email: randomUser.email,
       products: randomProducts.map(p => ({ product: p._id, quantity: faker.number.int({ min: 1, max: 3 }) })),
       total,
-      status: faker.helpers.arrayElement(['pending', 'shipped', 'delivered', 'cancelled']),
+      status: faker.helpers.arrayElement(['pending', 'paid', 'cancelled', 'shipped', 'delivered']),
       stripeSessionId: faker.string.uuid(),
     });
   }
@@ -78,10 +91,11 @@ const seedDatabase = async () => {
 
     // Génération et insertion des données
     const products = await Product.insertMany(generateProducts());
-    const users = await User.insertMany(generateUsers());
+    const users = await User.insertMany(await generateUsers());
     const orders = await Order.insertMany(generateOrders(users, products));
 
     console.log('Database successfully seeded');
+    console.log('Utilisateur test ajouté : Email -> john@example.com | Password -> Test@1234');
     process.exit();
   } catch (err) {
     console.error(err);
