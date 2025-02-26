@@ -37,31 +37,25 @@ router.post("/register", async (req, res) => {
 
 // Connexion (Login)
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
   
   try {
-      console.log("⏳ Tentative de connexion avec :", email);
-      
+    const { email, password } = req.body;
+
+       // Vérifier si l'utilisateur existe
       const user = await User.findOne({ email });
       if (!user) {
-          console.log("❌ Aucun utilisateur trouvé avec cet email.");
-          return res.status(400).json({ message: "Invalid credentials" });
+          return res.status(400).json({ message: "Invalid user" });
       }
 
-      console.log("✅ Utilisateur trouvé :", user.email);
-      console.log("Mot de passe entré :", password);
-      console.log("Mot de passe stocké en base :", user.password);
-      
+        // Vérifier le mot de passe
       const isMatch = await bcrypt.compare(password, user.password);
-      console.log("Résultat de bcrypt.compare():", isMatch);
-
       if (!isMatch) {
-          console.log("❌ Mot de passe incorrect.");
           return res.status(400).json({ message: "Invalid credentials" });
       }
-
-      console.log("✅ Connexion réussie !");
-      res.status(200).json({ message: "Login successful", user });
+ // Générer un token JWT
+ const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+ 
+ res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
 
   } catch (err) {
       console.error("❌ Erreur serveur :", err);
