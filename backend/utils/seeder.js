@@ -83,10 +83,14 @@ const generateOrders = (users, products, count = 15) => {
     const total = randomProducts.reduce((sum, product) => sum + parseFloat(product.price), 0);
 
     orders.push({
-      user: randomUser._id,
+      userId: randomUser._id,  // Assurez-vous que c'est bien "userId" comme dans votre modèle
       email: randomUser.email,
-      products: randomProducts.map(p => ({ product: p._id, quantity: faker.number.int({ min: 1, max: 3 }) })),
-      total,
+      items: randomProducts.map(p => ({  // 🔥 Correction : "items" au lieu de "products"
+        productId: p._id,
+        quantity: faker.number.int({ min: 1, max: 3 }),
+        price: p.price  // Ajout du prix pour cohérence
+      })),
+      totalAmount: total, // Correction de "total" pour correspondre au modèle
       status: faker.helpers.arrayElement(['pending', 'paid', 'cancelled', 'shipped', 'delivered']),
       stripeSessionId: faker.string.uuid(),
     });
