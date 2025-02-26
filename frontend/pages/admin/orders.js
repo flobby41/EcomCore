@@ -15,7 +15,15 @@ export default function OrdersAdmin() {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5001/api/orders');
+            const adminToken = localStorage.getItem('adminToken'); // ou depuis un cookie si nécessaire
+
+            const response = await fetch('http://localhost:5001/api/orders', {
+              headers: {
+                  'Authorization': `Bearer ${adminToken}`, // ✅ Ajout du token ici
+                  'Content-Type': 'application/json'
+              }
+          });
+            
             if (!response.ok) {
                 throw new Error('Erreur lors du chargement des commandes');
             }

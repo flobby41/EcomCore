@@ -10,6 +10,7 @@ const { handleWebhook } = require("./routes/webhookRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes").router;
+const userRoutes = require('./routes/userRoutes');
 
 
 dotenv.config();
@@ -36,6 +37,7 @@ app.use("/api/checkout", checkoutRoutes);
 app.use("/api/orders", orderRoutes);
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin', userRoutes);
 // Connexion à MongoDB Atlas avec Mongoose
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("✅ MongoDB Atlas connecté"))

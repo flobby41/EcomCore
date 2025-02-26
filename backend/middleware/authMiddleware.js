@@ -12,10 +12,24 @@ const authMiddleware = (req, res, next) => {
             return res.status(401).json({ message: "Token manquant ou invalide" });
         }
 
-        // ✅ Correction : Extraire le token correctement
         const token = authHeader.split(" ")[1];
         console.log("🔑 Token extrait:", token.substring(0, 20) + "...");
 
+        // ✅ Vérifier d'abord si c'est un token admin
+        try {
+      
+          console.log("🔑 JWT_SECRET:", process.env.JWT_SECRET);
+            const adminDecoded = jwt.verify(token, process.env.JWT_SECRET);
+            if (adminDecoded.isAdmin === true) {
+                console.log("✅ Token admin vérifié avec succès");
+                req.user = adminDecoded;
+                return next();
+            }
+        } catch (adminError) {
+            console.log("👤 Pas un token admin, vérification du token utilisateur");
+        }
+
+        // Si ce n'est pas un token admin, vérifier le token utilisateur normal
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log("✅ Token décodé:", decoded);
 
