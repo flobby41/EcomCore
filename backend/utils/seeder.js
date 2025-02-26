@@ -34,29 +34,41 @@ const generateProducts = (count = 20) => {
 
 // Fonction pour générer des utilisateurs avec hachage du mot de passe
 const generateUsers = async (count = 10) => {
-  const users = await Promise.all(
-    Array.from({ length: count }).map(async () => {
-      const hashedPassword = await bcrypt.hash("Test@1234", 10); // Utilisation d'un mot de passe fixe pour test
-      return {
+  const users = [];
+  
+  for (let i = 0; i < count; i++) {
+    try {
+      const password = faker.internet.password(); // Générer un mot de passe aléatoire
+      const hashedPassword = await bcrypt.hash(password, 10); // Assurer le hachage
+      console.log(`User ${i + 1} - Email: ${faker.internet.email()} | Password: ${password} | Hashed: ${hashedPassword}`);
+      users.push({
         name: faker.person.fullName(),
         email: faker.internet.email(),
         address: faker.location.streetAddress(),
         city: faker.location.city(),
         country: faker.location.country(),
         password: hashedPassword,
-      };
-    })
-  );
+        rawPassword: password, // Ajout temporaire pour debug
+      });
+    } catch (err) {
+      console.error(`Erreur lors du hachage du mot de passe pour l'utilisateur ${i + 1}:`, err);
+    }
+  }
 
   // Ajout d'un utilisateur test avec des identifiants connus
+  const testUserPassword = "Test@1234";
+  const hashedTestPassword = await bcrypt.hash(testUserPassword, 10);
+  console.log(`Test User - Email: john@example.com | Password: ${testUserPassword} | Hashed: ${hashedTestPassword}`);
   users.push({
     name: "John Doe",
     email: "john@example.com",
-    password: await bcrypt.hash("Test@1234", 10),
+    password: hashedTestPassword,
     address: "123 Main Street",
     city: "Test City",
-    country: "Test Country"
+    country: "Test Country",
+    rawPassword: testUserPassword, // Pour debug
   });
+
   return users;
 };
 
@@ -91,11 +103,20 @@ const seedDatabase = async () => {
 
     // Génération et insertion des données
     const products = await Product.insertMany(generateProducts());
-    const users = await User.insertMany(await generateUsers());
+    const users = await generateUsers();
+    await User.insertMany(users);
     const orders = await Order.insertMany(generateOrders(users, products));
 
     console.log('Database successfully seeded');
     console.log('Utilisateur test ajouté : Email -> john@example.com | Password -> Test@1234');
+
+    // Vérification de tous les utilisateurs après insertion
+    const allUsers = await User.find();
+    console.log('Vérification des utilisateurs en base de données :');
+    allUsers.slice(0, 5).forEach(user => {
+      console.log(`Email: ${user.email} | Password Hash: ${user.password}`);
+    });
+    
     process.exit();
   } catch (err) {
     console.error(err);
