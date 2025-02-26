@@ -14,7 +14,7 @@ export default function Orders() {
                 setError(null);
                 
                 const token = localStorage.getItem("token");
-                console.log("🔑 Token récupéré:", token ? "Oui" : "Non");
+               
 
                 if (!token) {
                     console.log("❌ Pas de token");
@@ -22,7 +22,6 @@ export default function Orders() {
                     return;
                 }
 
-                console.log("📡 Envoi requête...");
                 const response = await fetch("http://localhost:5001/api/orders", {
                     headers: {
                       "Authorization": `Bearer ${token}`, 
@@ -63,7 +62,7 @@ export default function Orders() {
     if (orders.length === 0) {
         return <div>Aucune commande trouvée</div>;
     }
-
+    console.log('orders ici ', orders)
     return (
         <div>
             <h1>Mes Commandes</h1>

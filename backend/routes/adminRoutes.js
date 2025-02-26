@@ -1,8 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const Order = require("../models/Order");
+const adminAuthMiddleware = require("../middleware/adminAuthMiddleware"); // ✅ Import du middleware
+
+
+
 
 // /api/admin Login admin 
+
+// 🚀 Nouvelle route pour récupérer TOUTES les commandes (ADMIN UNIQUEMENT)
+router.get("/orders", adminAuthMiddleware, async (req, res) => {
+  try {
+      console.log("🔐 Accès admin - Récupération de toutes les commandes");
+      const orders = await Order.find(); // Récupère toutes les commandes
+      res.json(orders);
+  } catch (error) {
+      console.error("❌ Erreur serveur:", error);
+      res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
+
+
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     
@@ -28,5 +48,7 @@ console.log('process.env.JWT_SECRET CHECK : ' , process.env.JWT_SECRET)
         res.status(401).json({ message: 'Identifiants admin invalides' });
     }
 });
+
+
 
 module.exports = router; 

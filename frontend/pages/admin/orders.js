@@ -2,22 +2,25 @@ import { useState, useEffect } from 'react';
 import AdminLayout from './layout';
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/router";
+
 
 export default function OrdersAdmin() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const router = useRouter();
+    
 
+   
     useEffect(() => {
-        fetchOrders();
-    }, []);
 
     const fetchOrders = async () => {
         try {
             setLoading(true);
             const adminToken = localStorage.getItem('adminToken'); // ou depuis un cookie si nécessaire
 
-            const response = await fetch('http://localhost:5001/api/orders', {
+            const response = await fetch('http://localhost:5001/api/admin/orders', {
               headers: {
                   'Authorization': `Bearer ${adminToken}`, // ✅ Ajout du token ici
                   'Content-Type': 'application/json'
@@ -28,14 +31,19 @@ export default function OrdersAdmin() {
                 throw new Error('Erreur lors du chargement des commandes');
             }
             const data = await response.json();
-            setOrders(Array.isArray(data) ? data : []);
-        } catch (error) {
-            console.error('Erreur:', error);
-            setError(error.message);
-        } finally {
+            setOrders(data);
             setLoading(false);
-        }
+            console.log('orders ici ', data)
+
+    } catch (error) {
+      console.error("❌ Erreur:", error);
+      setError(error.message);
+      setLoading(false);
+        } 
     };
+    fetchOrders();
+  }, [router]);
+
 
     if (loading) {
         return (
@@ -56,7 +64,6 @@ export default function OrdersAdmin() {
             </AdminLayout>
         );
     }
-
     return (
         <AdminLayout>
             <div className="container mx-auto px-6 py-8">
