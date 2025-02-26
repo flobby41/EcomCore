@@ -27,7 +27,7 @@ const orderSchema = new mongoose.Schema({
     }],
     status: {
         type: String,
-        enum: ['pending', 'paid', 'cancelled'],
+        enum: ['pending', 'paid', 'cancelled', 'shipped', 'delivered'], // ✅ Nouveaux statuts ajoutés
         default: 'pending'
     },
     stripeSessionId: {
