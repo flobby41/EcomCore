@@ -8,7 +8,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 router.get("/", authMiddleware, async (req, res) => {
     try {
         console.log("👤 Recherche des commandes pour email:", req.user.email);
-        
+        console.log("👤 User extrait du token:", req.user);
+
         // Recherche par email au lieu de userId
         const orders = await Order.find({ 
             customerEmail: req.user.email,
@@ -79,7 +80,7 @@ router.post("/guest", async (req, res) => {
         // Créer la commande
         const order = new Order({
             customerEmail: email,
-            products: products.map(p => ({
+            items: products.map(p => ({
                 productId: p._id,
                 quantity: p.quantity,
                 price: p.price

@@ -30,6 +30,10 @@ const orderSchema = new mongoose.Schema({
         enum: ['pending', 'paid', 'cancelled', 'shipped', 'delivered'], // ✅ Nouveaux statuts ajoutés
         default: 'pending'
     },
+    totalAmount: {
+      type: Number,
+      required: true
+  },
     stripeSessionId: {
         type: String,
         required: true

@@ -38,7 +38,7 @@ const authMiddleware = (req, res, next) => {
             return res.status(401).json({ message: "Utilisateur non authentifié" });
         }
 
-        req.user = { id: decoded.userId }; // Uniformiser l'accès à l'ID utilisateur
+        req.user = { id: decoded.userId, email: decoded.email  }; // Uniformiser l'accès à l'ID utilisateur
 
         next();
     } catch (error) {
