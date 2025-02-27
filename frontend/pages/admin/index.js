@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { 
   BarChart3, ShoppingCart, Users, Package, 
   TrendingUp, AlertCircle, Calendar, Settings,
-  DollarSign, Percent, ArrowUp, ArrowDown
+  DollarSign, Percent, ArrowUp, ArrowDown, CheckCircle
 } from "lucide-react"
 import AdminLayout from './layout'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
@@ -184,12 +184,8 @@ export default function AdminDashboard() {
                         <td className="py-4">{order.customer}</td>
                         <td className="py-4">{order.amount}€</td>
                         <td className="py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {order.status}
+                          <span className={`px-2 py-1 rounded-full text-xs ${order.status.color}`}>
+                            {order.status.text}
                           </span>
                         </td>
                       </tr>
@@ -219,6 +215,12 @@ export default function AdminDashboard() {
                     <span>{alert.message}</span>
                   </div>
                 ))}
+                {dashboardData?.alerts.length === 0 && (
+                  <div className="p-4 rounded-lg flex items-center gap-3 bg-green-50 text-green-800">
+                    <CheckCircle className="h-5 w-5" />
+                    <span>Aucune alerte à signaler</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

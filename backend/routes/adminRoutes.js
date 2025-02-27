@@ -6,8 +6,16 @@ const adminAuthMiddleware = require("../middleware/adminAuthMiddleware"); // ✅
 const User = require('../models/User');
 const Product = require('../models/Product');
 
-
-
+// Middleware pour logger les requêtes
+router.use((req, res, next) => {
+  console.log('📝 Admin Request:', {
+    method: req.method,
+    path: req.path,
+    query: req.query,
+    headers: req.headers
+  });
+  next();
+});
 
 // /api/admin Login admin 
 
@@ -53,91 +61,168 @@ console.log('process.env.JWT_SECRET CHECK : ' , process.env.JWT_SECRET)
 
 router.get('/dashboard', async (req, res) => {
   try {
+    console.log("🔍 Récupération des données du dashboard");
     const { range } = req.query;
     const now = new Date();
-    let startDate;
+    let startDate = new Date();
 
+    // Ajuster la date de début selon la période
     switch (range) {
       case 'day':
-        startDate = new Date(now.setDate(now.getDate() - 1));
+        startDate.setDate(now.getDate() - 1);
         break;
       case 'week':
-        startDate = new Date(now.setDate(now.getDate() - 7));
+        startDate.setDate(now.getDate() - 7);
         break;
       case 'month':
-        startDate = new Date(now.setMonth(now.getMonth() - 1));
+        startDate.setMonth(now.getMonth() - 1);
         break;
       default:
-        startDate = new Date(now.setDate(now.getDate() - 7));
+        startDate.setDate(now.getDate() - 7);
     }
 
-    // Récupérer les statistiques
-    const [
-      totalRevenue,
-      totalOrders,
-      newCustomers,
-      recentOrders,
-      lowStockProducts
-    ] = await Promise.all([
-      Order.aggregate([
-        { $match: { createdAt: { $gte: startDate } } },
-        { $group: { _id: null, total: { $sum: "$totalAmount" } } }
-      ]),
-      Order.countDocuments({ createdAt: { $gte: startDate } }),
-      User.countDocuments({ createdAt: { $gte: startDate } }),
-      Order.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .populate('userId', 'email'),
-      Product.find({ stock: { $lt: 10 } })
-    ]);
-
-    // Préparer les données pour les graphiques
-    const salesData = await Order.aggregate([
-      { $match: { createdAt: { $gte: startDate } } },
+    // Récupération du chiffre d'affaires avec formatage des nombres
+    const revenueData = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $addFields: {
+          calculatedTotal: {
+            $reduce: {
+              input: "$items",
+              initialValue: 0,
+              in: { 
+                $add: [
+                  "$$value",
+                  { $multiply: ["$$this.price", "$$this.quantity"] }
+                ]
+              }
+            }
+          }
+        }
+      },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          amount: { $sum: "$totalAmount" }
+          _id: null,
+          total: { $sum: "$calculatedTotal" },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Données pour le graphique avec dates filtrées
+    const salesChart = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $addFields: {
+          calculatedTotal: {
+            $reduce: {
+              input: "$items",
+              initialValue: 0,
+              in: { 
+                $add: ["$$value", { $multiply: ["$$this.price", "$$this.quantity"] }]
+              }
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%d/%m", date: "$createdAt" } },
+          amount: { $sum: "$calculatedTotal" },
+          count: { $sum: 1 }
         }
       },
       { $sort: { _id: 1 } }
     ]);
 
+    // Commandes récentes avec ID courts et montants formatés
+    const recentOrders = await Order.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('userId', 'email')
+      .lean();
+
     res.json({
       revenue: {
-        total: totalRevenue[0]?.total || 0,
-        trend: 12 // Calculer la tendance
+        // Arrondir à 2 décimales
+        total: Math.round((revenueData[0]?.total || 0) * 100) / 100,
+        trend: 0
       },
       orders: {
-        total: totalOrders,
-        trend: 5 // Calculer la tendance
+        total: revenueData[0]?.count || 0,
+        trend: 0
       },
       customers: {
-        total: newCustomers,
-        trend: 8 // Calculer la tendance
+        total: await User.countDocuments({ createdAt: { $gte: startDate } }),
+        trend: 0
       },
-      salesChart: salesData.map(item => ({
+      salesChart: salesChart.map(item => ({
         date: item._id,
-        amount: item.amount
+        // Arrondir les montants du graphique
+        amount: Math.round(item.amount * 100) / 100,
+        orders: item.count
       })),
-      recentOrders: recentOrders.map(order => ({
-        id: order._id,
-        customer: order.userId.email,
-        amount: order.totalAmount,
-        status: order.status
-      })),
+      recentOrders: recentOrders.map(order => {
+        // Mapping des status avec leurs couleurs
+        const statusMap = {
+          'paid': { text: 'Payée', color: 'bg-green-100 text-green-800' },
+          'pending': { text: 'En attente', color: 'bg-yellow-100 text-yellow-800' },
+          'cancelled': { text: 'Annulée', color: 'bg-red-100 text-red-800' },
+          'delivered': { text: 'Livrée', color: 'bg-green-100 text-green-800' },
+          'shipped': { text: 'Expédiée', color: 'bg-blue-100 text-blue-800' }
+        };
+
+        return {
+          id: order._id.toString().slice(-6),
+          customer: order.userId?.email || 'Client inconnu',
+          amount: Math.round(order.items.reduce((sum, item) => 
+            sum + (item.price * item.quantity), 0) * 100) / 100,
+          status: {
+            text: statusMap[order.status]?.text || order.status,
+            color: statusMap[order.status]?.color || 'bg-gray-100 text-gray-800'
+          },
+          date: new Date(order.createdAt).toLocaleDateString('fr-FR')
+        };
+      }),
       alerts: [
-        ...lowStockProducts.map(product => ({
+        // Stock faible
+        ...(await Product.find({ stock: { $lt: 10 } })).map(product => ({
           type: 'warning',
-          message: `Stock faible pour ${product.name} (${product.stock} restants)`
-        }))
+          message: `Stock faible : ${product.name} (${product.stock} restants)`
+        })),
+        // Commandes en attente
+        ...(await Order.countDocuments({ status: 'pending' }) > 0 ? [{
+          type: 'info',
+          message: `${await Order.countDocuments({ status: 'pending' })} commandes en attente de traitement`
+        }] : []),
+        // Commandes annulées récentes
+        ...(await Order.countDocuments({ 
+          status: 'cancelled',
+          createdAt: { $gte: new Date(Date.now() - 24*60*60*1000) }
+        }) > 0 ? [{
+          type: 'error',
+          message: `${await Order.countDocuments({ 
+            status: 'cancelled',
+            createdAt: { $gte: new Date(Date.now() - 24*60*60*1000) }
+          })} commandes annulées aujourd'hui`
+        }] : [])
       ]
     });
 
   } catch (error) {
-    console.error('Erreur dashboard:', error);
-    res.status(500).json({ message: "Erreur serveur" });
+    console.error('❌ Erreur dashboard:', error);
+    res.status(500).json({ 
+      message: "Erreur serveur",
+      details: error.message 
+    });
   }
 });
 
