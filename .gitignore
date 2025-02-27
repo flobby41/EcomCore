@@ -5,6 +5,8 @@
 .env.development
 .env.production
 .env.test
+frontend/.env.local
+backend/.env
 
 # Ignorer le dossier node_modules
 node_modules/
