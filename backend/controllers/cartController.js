@@ -1,5 +1,6 @@
 const Cart = require('../models/Cart');
 const User = require('../models/User');
+const Product = require('../models/Product');
 const mongoose = require('mongoose'); 
 
 exports.mergeCart = async (req, res) => {
@@ -12,20 +13,35 @@ exports.mergeCart = async (req, res) => {
           return res.status(400).json({ message: "Panier invalide" });
       }
 
+      const productIds = items.map(item => item.productId);
+      const products = await Product.find({ _id: { $in: productIds } });
+      const productMap = products.reduce((map, product) => {
+          map[product._id.toString()] = product;
+          return map;
+      }, {});
+
       let cart = await Cart.findOne({ userId });
 
       if (!cart) {
-          cart = new Cart({ userId, userEmail, items });
+          const itemsWithNames = items.map(item => ({
+              ...item,
+              productName: productMap[item.productId]?.name || 'Produit inconnu'
+          }));
+          cart = new Cart({ userId, userEmail, items: itemsWithNames });
       } else {
           cart.userEmail = userEmail;
-          items.forEach(item => {
+          for (const item of items) {
               const existingItem = cart.items.find(p => p.productId.toString() === item.productId);
               if (existingItem) {
                   existingItem.quantity += item.quantity;
+                  existingItem.productName = productMap[item.productId]?.name || 'Produit inconnu';
               } else {
-                  cart.items.push(item);
+                  cart.items.push({
+                      ...item,
+                      productName: productMap[item.productId]?.name || 'Produit inconnu'
+                  });
               }
-          });
+          }
       }
 
       await cart.save();
@@ -50,7 +66,10 @@ exports.addToCart = async (req, res) => {
       return res.status(400).json({ message: "ID du produit invalide" });
     }
 
-    const objectIdProductId = new mongoose.Types.ObjectId(productId);
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Produit non trouvé" });
+    }
 
     let cart = await Cart.findOne({ userId });
 
@@ -59,6 +78,19 @@ exports.addToCart = async (req, res) => {
       cart = new Cart({ userId, userEmail, items: [] });
     } else {
       cart.userEmail = userEmail;
+      
+      const existingProductIds = cart.items.map(item => item.productId.toString());
+      const existingProducts = await Product.find({ 
+        _id: { $in: existingProductIds } 
+      });
+      const productMap = existingProducts.reduce((map, prod) => {
+        map[prod._id.toString()] = prod;
+        return map;
+      }, {});
+
+      cart.items.forEach(item => {
+        item.productName = productMap[item.productId.toString()]?.name || 'Produit inconnu';
+      });
     }
 
     const existingItem = cart.items.find(item => item.productId.toString() === productId);
@@ -66,9 +98,15 @@ exports.addToCart = async (req, res) => {
     if (existingItem) {
       console.log("➕ Produit déjà dans le panier, augmentation de la quantité...");
       existingItem.quantity += quantity;
+      existingItem.productName = product.name;
     } else {
       console.log("🆕 Ajout du produit au panier...");
-      cart.items.push({ productId: objectIdProductId, quantity, price });
+      cart.items.push({ 
+        productId, 
+        productName: product.name,
+        quantity, 
+        price 
+      });
     }
 
     await cart.save();
