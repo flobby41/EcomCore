@@ -11,16 +11,9 @@ router.get("/", authMiddleware, async (req, res) => {
         console.log("👤 User extrait du token:", req.user);
 
         // Recherche par email au lieu de userId
-        const orders = await Order.find({ 
-            customerEmail: req.user.email,
-            status: "paid" 
-        });
+        const orders = await Order.find({ customerEmail: req.user.email });
         
-        console.log("🔍 Critères de recherche:", {
-            customerEmail: req.user.email,
-            status: "paid"
-        });
-        console.log("📦 Commandes filtrées trouvées:", orders);
+      
 
         res.json(orders);
 

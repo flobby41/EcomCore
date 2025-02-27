@@ -1,10 +1,12 @@
 const Cart = require('../models/Cart');
+const User = require('../models/User');
 const mongoose = require('mongoose'); 
 
 exports.mergeCart = async (req, res) => {
   try {
-      const userId = req.user.id; // Récupérer l'utilisateur connecté
-      const { items } = req.body; // Panier local à fusionner
+      const userId = req.user.id;
+      const userEmail = req.user.email;
+      const { items } = req.body;
 
       if (!items || !Array.isArray(items)) {
           return res.status(400).json({ message: "Panier invalide" });
@@ -13,10 +15,9 @@ exports.mergeCart = async (req, res) => {
       let cart = await Cart.findOne({ userId });
 
       if (!cart) {
-          // Si l'utilisateur n'a pas encore de panier, on le crée avec les articles locaux
-          cart = new Cart({ userId, items });
+          cart = new Cart({ userId, userEmail, items });
       } else {
-          // 🔥 Fusionner les articles : mettre à jour les quantités si déjà existants
+          cart.userEmail = userEmail;
           items.forEach(item => {
               const existingItem = cart.items.find(p => p.productId.toString() === item.productId);
               if (existingItem) {
@@ -41,7 +42,8 @@ exports.addToCart = async (req, res) => {
     console.log("🔑 Utilisateur authentifié:", req.user);
 
     const { productId, quantity, price } = req.body;
-    const userId = req.user.id; // Vérifier que userId est bien récupéré
+    const userId = req.user.id;
+    const userEmail = req.user.email;
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       console.log("❌ ID du produit invalide:", productId);
@@ -54,9 +56,9 @@ exports.addToCart = async (req, res) => {
 
     if (!cart) {
       console.log("🛒 Aucun panier trouvé, création d'un nouveau...");
-      cart = new Cart({ userId, items: [] });
+      cart = new Cart({ userId, userEmail, items: [] });
     } else {
-      console.log("🛒 Panier trouvé:", cart);
+      cart.userEmail = userEmail;
     }
 
     const existingItem = cart.items.find(item => item.productId.toString() === productId);
