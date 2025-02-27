@@ -6,9 +6,9 @@ const CartSchema = new mongoose.Schema({
   items: [
     {
       productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-      productName: { type: String, required: true },
+      productName: { type: String, required: true }, // ✅ Ajout du nom du produit
       quantity: { type: Number, required: true, default: 1 },
-      price: { type: Number, required: true }, // Sauvegarde du prix au moment de l'ajout
+      price: { type: Number, required: true },
     }
   ],
 }, { timestamps: true });
