@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Layout from "@/components/Layout";
 
 export default function Orders() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [userId, setUserId] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -15,24 +17,29 @@ export default function Orders() {
                 
                 const token = localStorage.getItem("token");
                
-
                 if (!token) {
                     console.log("❌ Pas de token");
                     router.push('/login');
                     return;
                 }
 
+                // ✅ Décodage du token pour obtenir l'userId
+                const tokenData = JSON.parse(atob(token.split('.')[1]));
+                setUserId(tokenData.id);
+                console.log("👤 UserId from token:", tokenData.id);
+
                 const response = await fetch("http://localhost:5001/api/orders", {
                     headers: {
-                      "Authorization": `Bearer ${token}`, 
-                      "Content-Type": "application/json"
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
                     }
                 });
 
                 console.log("📡 Status:", response.status);
                 
                 if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
                 }
 
                 const data = await response.json();
@@ -51,29 +58,53 @@ export default function Orders() {
         fetchOrders();
     }, [router]);
 
-    if (error) {
-        return <div className="text-red-500">Erreur: {error}</div>;
-    }
-
-    if (loading) {
-        return <div>Chargement...</div>;
-    }
-
-    if (orders.length === 0) {
-        return <div>Aucune commande trouvée</div>;
-    }
-    console.log('orders ici ', orders)
     return (
-        <div>
-            <h1>Mes Commandes</h1>
-            {orders.map((order) => (
-                <div key={order._id} className="border p-4 my-2">
-                    <p>ID: {order._id}</p>
-                    <p>Total: {order.totalAmount}€</p>
-                    <p>Status: {order.status}</p>
-                    <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-                </div>
-            ))}
-        </div>
+        <Layout>
+            <div className="container mx-auto px-4 py-8">
+                <h1 className="text-2xl font-bold mb-6">Mes Commandes</h1>
+                
+                {loading && (
+                    <div className="text-center">Chargement...</div>
+                )}
+
+                {error && (
+                    <div className="text-red-500 mb-4">Erreur: {error}</div>
+                )}
+
+                {!loading && !error && (
+                    <>
+                        <div className="mb-4">
+                            <p>ID Utilisateur: {userId}</p>
+                            <p>Nombre de commandes: {orders.length}</p>
+                        </div>
+
+                        {orders.length === 0 ? (
+                            <div className="text-gray-500">Aucune commande trouvée</div>
+                        ) : (
+                            <div className="grid gap-4">
+                                {orders.map((order) => (
+                                    <div key={order._id} className="border rounded-lg p-4 shadow">
+                                        <p className="font-semibold">Commande #{order._id}</p>
+                                        <p>Total: {order.totalAmount}€</p>
+                                        <p>Status: {order.status}</p>
+                                        <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
+                                        <details className="mt-2">
+                                            <summary className="cursor-pointer">Détails des produits</summary>
+                                            <ul className="mt-2 pl-4">
+                                                {order.items.map((item, index) => (
+                                                    <li key={index}>
+                                                        {item.productId} - Quantité: {item.quantity}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </details>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        </Layout>
     );
 }

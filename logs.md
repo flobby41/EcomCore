@@ -1,56 +1,62 @@
-📥 Requête reçue pour ajouter au panier: { productId: '67bf1eb4578d6b50301bc472', quantity: 1, price: 423.05 }
-🔑 Utilisateur authentifié: {
-  id: '67bf1eb4578d6b50301bc487',
-  email: 'Alexandrea_Trantow@yahoo.com'
+🔑 Headers reçus: {
+  host: 'localhost:5001',
+  connection: 'keep-alive',
+  'sec-ch-ua-platform': '"macOS"',
+  authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2MwMjIxMTVlNWJlNGU2ZjNkYzM4NWEiLCJlbWFpbCI6IkRhcmJ5NzRAeWFob28uY29tIiwiaWF0IjoxNzQwNjQ0OTYwLCJleHAiOjE3NDEyNDk3NjB9.bGrSxpLWAwQLUwC8gZPuvOSOgxtUzFDt3EzkkMQ5PJs',
+  'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+  'sec-ch-ua': '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"',
+  'content-type': 'application/json',
+  'sec-ch-ua-mobile': '?0',
+  accept: '*/*',
+  origin: 'http://localhost:3001',
+  'sec-fetch-site': 'same-site',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-dest': 'empty',
+  referer: 'http://localhost:3001/',
+  'accept-encoding': 'gzip, deflate, br, zstd',
+  'accept-language': 'sv,en-US;q=0.9,en;q=0.8,fr;q=0.7',
+  'if-none-match': 'W/"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w"'
 }
-🆕 Ajout du produit au panier...
-❌ Erreur lors de l'ajout au panier : Error: Cart validation failed: items.0.productName: Path `productName` is required., items.1.productName: Path `productName` is required., items.2.productName: Path `productName` is required.
-    at ValidationError.inspect (/Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/error/validation.js:52:26)
-    at formatValue (node:internal/util/inspect:850:19)
-    at inspect (node:internal/util/inspect:387:10)
-    at formatWithOptionsInternal (node:internal/util/inspect:2366:40)
-    at formatWithOptions (node:internal/util/inspect:2228:10)
-    at console.value (node:internal/console/constructor:345:14)
-    at console.error (node:internal/console/constructor:412:61)
-    at exports.addToCart (/Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/controllers/CartController.js:103:13)
-    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
-  errors: {
-    'items.0.productName': ValidatorError: Path `productName` is required.
-        at validate (/Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/schemaType.js:1404:13)
-        at SchemaType.doValidate (/Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/schemaType.js:1388:7)
-        at /Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/document.js:3082:18
-        at process.processTicksAndRejections (node:internal/process/task_queues:85:11) {
-      properties: [Object],
-      kind: 'required',
-      path: 'productName',
-      value: undefined,
-      reason: undefined,
-      [Symbol(mongoose#validatorError)]: true
-    },
-    'items.1.productName': ValidatorError: Path `productName` is required.
-        at validate (/Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/schemaType.js:1404:13)
-        at SchemaType.doValidate (/Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/schemaType.js:1388:7)
-        at /Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/document.js:3082:18
-        at process.processTicksAndRejections (node:internal/process/task_queues:85:11) {
-      properties: [Object],
-      kind: 'required',
-      path: 'productName',
-      value: undefined,
-      reason: undefined,
-      [Symbol(mongoose#validatorError)]: true
-    },
-    'items.2.productName': ValidatorError: Path `productName` is required.
-        at validate (/Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/schemaType.js:1404:13)
-        at SchemaType.doValidate (/Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/schemaType.js:1388:7)
-        at /Users/chehebvassoutflorian/Documents/DEV/ecommerce-template/backend/node_modules/mongoose/lib/document.js:3082:18
-        at process.processTicksAndRejections (node:internal/process/task_queues:85:11) {
-      properties: [Object],
-      kind: 'required',
-      path: 'productName',
-      value: undefined,
-      reason: undefined,
-      [Symbol(mongoose#validatorError)]: true
-    }
-  },
-  _message: 'Cart validation failed'
+🔑 Auth Header reçu: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2MwMjIxMTVlNWJlNGU2ZjNkYzM4NWEiLCJlbWFpbCI6IkRhcmJ5NzRAeWFob28uY29tIiwiaWF0IjoxNzQwNjQ0OTYwLCJleHAiOjE3NDEyNDk3NjB9.bGrSxpLWAwQLUwC8gZPuvOSOgxtUzFDt3EzkkMQ5PJs
+🔑 Token extrait: eyJhbGciOiJIUzI1NiIs...
+🔑 JWT_SECRET: tonSecretSuperSecurise
+✅ Token décodé: {
+  userId: '67c022115e5be4e6f3dc385a',
+  email: 'Darby74@yahoo.com',
+  iat: 1740644960,
+  exp: 1741249760
 }
+🔍 Recherche des commandes pour userId: 67c022115e5be4e6f3dc385a
+📦 0 commandes trouvées
+❌ Aucune commande trouvée pour cet utilisateur
+🔑 Headers reçus: {
+  host: 'localhost:5001',
+  connection: 'keep-alive',
+  'sec-ch-ua-platform': '"macOS"',
+  authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2MwMjIxMTVlNWJlNGU2ZjNkYzM4NWEiLCJlbWFpbCI6IkRhcmJ5NzRAeWFob28uY29tIiwiaWF0IjoxNzQwNjQ0OTYwLCJleHAiOjE3NDEyNDk3NjB9.bGrSxpLWAwQLUwC8gZPuvOSOgxtUzFDt3EzkkMQ5PJs',
+  'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
+  'sec-ch-ua': '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"',
+  'content-type': 'application/json',
+  'sec-ch-ua-mobile': '?0',
+  accept: '*/*',
+  origin: 'http://localhost:3001',
+  'sec-fetch-site': 'same-site',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-dest': 'empty',
+  referer: 'http://localhost:3001/',
+  'accept-encoding': 'gzip, deflate, br, zstd',
+  'accept-language': 'sv,en-US;q=0.9,en;q=0.8,fr;q=0.7',
+  'if-none-match': 'W/"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w"'
+}
+🔑 Auth Header reçu: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2MwMjIxMTVlNWJlNGU2ZjNkYzM4NWEiLCJlbWFpbCI6IkRhcmJ5NzRAeWFob28uY29tIiwiaWF0IjoxNzQwNjQ0OTYwLCJleHAiOjE3NDEyNDk3NjB9.bGrSxpLWAwQLUwC8gZPuvOSOgxtUzFDt3EzkkMQ5PJs
+🔑 Token extrait: eyJhbGciOiJIUzI1NiIs...
+🔑 JWT_SECRET: tonSecretSuperSecurise
+✅ Token décodé: {
+  userId: '67c022115e5be4e6f3dc385a',
+  email: 'Darby74@yahoo.com',
+  iat: 1740644960,
+  exp: 1741249760
+}
+🔍 Recherche des commandes pour userId: 67c022115e5be4e6f3dc385a
+📦 0 commandes trouvées
+❌ Aucune commande trouvée pour cet utilisateur

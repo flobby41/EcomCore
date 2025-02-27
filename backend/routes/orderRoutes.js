@@ -4,22 +4,24 @@ const authMiddleware = require("../middleware/authMiddleware"); // Ajout du midd
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-// /api/orders Route protégée pour récupérer les commandes du user connecté
-router.get("/", authMiddleware, async (req, res) => {
+// GET /api/orders - Récupérer les commandes de l'utilisateur
+router.get('/', authMiddleware, async (req, res) => {
     try {
-        console.log("👤 Recherche des commandes pour email:", req.user.email);
-        console.log("👤 User extrait du token:", req.user);
-
-        // Recherche par email au lieu de userId
-        const orders = await Order.find({ customerEmail: req.user.email });
+        console.log("🔍 Recherche des commandes pour userId:", req.user.id);
         
-      
+        const orders = await Order.find({ userId: req.user.id })
+            .sort({ createdAt: -1 }); // Plus récentes d'abord
+        
+        console.log(`📦 ${orders.length} commandes trouvées`);
+        
+        if (orders.length === 0) {
+            console.log("❌ Aucune commande trouvée pour cet utilisateur");
+        }
 
         res.json(orders);
-
     } catch (error) {
-        console.error("❌ Erreur:", error);
-        res.status(500).json({ message: "Erreur serveur" });
+        console.error("❌ Erreur lors de la récupération des commandes:", error);
+        res.status(500).json({ message: "Erreur lors de la récupération des commandes" });
     }
 });
 

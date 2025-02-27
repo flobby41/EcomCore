@@ -74,23 +74,31 @@ users.push({
 };
 
 // Fonction pour générer des commandes
-const generateOrders = (users, products, count = 15) => {
+const generateOrders = async (users, products, count = 15) => {
   const orders = [];
+  
+  // Récupérer les vrais utilisateurs de la base de données
+  const dbUsers = await User.find({});
+  
   for (let i = 0; i < count; i++) {
-    const randomUser = users[Math.floor(Math.random() * users.length)];
+    // Utiliser les utilisateurs de la base de données
+    const randomUser = dbUsers[Math.floor(Math.random() * dbUsers.length)];
     const randomProducts = faker.helpers.shuffle(products).slice(0, faker.number.int({ min: 1, max: 5 }));
 
-    const total = randomProducts.reduce((sum, product) => sum + parseFloat(product.price), 0);
+    console.log(`Création commande pour user:`, {
+      id: randomUser._id,
+      email: randomUser.email
+    });
 
     orders.push({
-      userId: randomUser._id,  // Assurez-vous que c'est bien "userId" comme dans votre modèle
+      userId: randomUser._id, // Utiliser l'ID réel de l'utilisateur
       email: randomUser.email,
-      items: randomProducts.map(p => ({  // 🔥 Correction : "items" au lieu de "products"
+      items: randomProducts.map(p => ({
         productId: p._id,
         quantity: faker.number.int({ min: 1, max: 3 }),
-        price: p.price  // Ajout du prix pour cohérence
+        price: p.price
       })),
-      totalAmount: total, // Correction de "total" pour correspondre au modèle
+      totalAmount: randomProducts.reduce((sum, p) => sum + parseFloat(p.price), 0),
       status: faker.helpers.arrayElement(['pending', 'paid', 'cancelled', 'shipped', 'delivered']),
       stripeSessionId: faker.string.uuid(),
     });
@@ -106,11 +114,16 @@ const seedDatabase = async () => {
     await User.deleteMany();
     await Order.deleteMany();
 
-    // Génération et insertion des données
+    // Génération et insertion dans l'ordre
     const products = await Product.insertMany(generateProducts());
+    
+    // Générer et insérer les utilisateurs
     const users = await generateUsers();
-    await User.insertMany(users);
-    const orders = await Order.insertMany(generateOrders(users, products));
+    const insertedUsers = await User.insertMany(users);
+    
+    // Générer et insérer les commandes avec les utilisateurs insérés
+    const orders = await generateOrders(insertedUsers, products);
+    await Order.insertMany(orders);
 
     console.log('Database successfully seeded');
     console.log('Utilisateur test ajouté : Email -> john@example.com | Password -> Test@1234');
