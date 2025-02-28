@@ -173,11 +173,11 @@ router.get('/dashboard', async (req, res) => {
       recentOrders: recentOrders.map(order => {
         // Mapping des status avec leurs couleurs
         const statusMap = {
-          'paid': { text: 'Payée', color: 'bg-green-100 text-green-800' },
-          'pending': { text: 'En attente', color: 'bg-yellow-100 text-yellow-800' },
-          'cancelled': { text: 'Annulée', color: 'bg-red-100 text-red-800' },
-          'delivered': { text: 'Livrée', color: 'bg-green-100 text-green-800' },
-          'shipped': { text: 'Expédiée', color: 'bg-blue-100 text-blue-800' }
+          'paid': { text: 'paid', color: 'bg-green-100 text-green-800' },
+          'pending': { text: 'pending', color: 'bg-yellow-100 text-yellow-800' },
+          'cancelled': { text: 'cancelled', color: 'bg-red-100 text-red-800' },
+          'delivered': { text: 'delivered', color: 'bg-green-100 text-green-800' },
+          'shipped': { text: 'shipped', color: 'bg-blue-100 text-blue-800' }
         };
 
         return {

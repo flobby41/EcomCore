@@ -110,7 +110,7 @@ export default function CustomersAdmin() {
     if (loading) return (
         <AdminLayout>
             <div className="container mx-auto px-6 py-8">
-                <p>Chargement des clients...</p>
+                <p>Loading customers...</p>
             </div>
         </AdminLayout>
     );
@@ -118,7 +118,7 @@ export default function CustomersAdmin() {
     if (error) return (
         <AdminLayout>
             <div className="container mx-auto px-6 py-8">
-                <p className="text-red-500">Erreur: {error}</p>
+                <p className="text-red-500">Error: {error}</p>
             </div>
         </AdminLayout>
     );
@@ -126,18 +126,18 @@ export default function CustomersAdmin() {
     return (
         <AdminLayout>
             <div className="container mx-auto px-6 py-8">
-                <h1 className="text-2xl font-semibold mb-6">Gestion des Clients</h1>
+                <h1 className="text-2xl font-semibold mb-6">Customer Management</h1>
                 
                 {customers.length === 0 ? (
-                    <p>Aucun client trouvé</p>
+                    <p>No customers found</p>
                 ) : (
                     <Card className="overflow-x-auto">
                         <table className="w-full whitespace-nowrap">
                             <thead>
                                 <tr className="text-left font-bold">
-                                    <th className="px-6 py-3 border-b">Nom</th>
+                                    <th className="px-6 py-3 border-b">Name</th>
                                     <th className="px-6 py-3 border-b">Email</th>
-                                    <th className="px-6 py-3 border-b">Date d'inscription</th>
+                                    <th className="px-6 py-3 border-b">Registration Date</th>
                                     <th className="px-6 py-3 border-b">Actions</th>
                                 </tr>
                             </thead>
@@ -154,13 +154,13 @@ export default function CustomersAdmin() {
                                                 className="mr-2"
                                                 onClick={() => handleEdit(customer._id)}
                                             >
-                                                Éditer
+                                                Edit
                                             </Button>
                                             <Button 
                                                 className="bg-red-500 hover:bg-red-600"
                                                 onClick={() => handleDelete(customer._id)}
                                             >
-                                                Supprimer
+                                                Delete
                                             </Button>
                                         </td>
                                     </tr>

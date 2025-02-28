@@ -31,7 +31,7 @@ export default function GuestCheckout() {
             });
 
             if (!response.ok) {
-                throw new Error('Erreur lors de la création de la commande');
+                throw new Error('Error creating order');
             }
 
             const data = await response.json();
@@ -43,8 +43,8 @@ export default function GuestCheckout() {
             }
 
         } catch (error) {
-            toast.error("Erreur lors de la commande");
-            console.error('Erreur:', error);
+            toast.error("Error processing order");
+            console.error('Error:', error);
         } finally {
             setLoading(false);
         }
@@ -53,9 +53,9 @@ export default function GuestCheckout() {
     if (cart.length === 0) {
         return (
             <div className="container mx-auto p-4">
-                <p>Votre panier est vide</p>
+                <p>Your cart is empty</p>
                 <Link href="/products" className="text-blue-500 hover:underline">
-                    Retour aux produits
+                    Back to products
                 </Link>
             </div>
         );
@@ -63,21 +63,21 @@ export default function GuestCheckout() {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Commander en tant qu'invité</h1>
+            <h1 className="text-2xl font-bold mb-4">Guest Checkout</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <h2 className="text-xl font-semibold mb-4">Résumé de votre commande</h2>
+                    <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
                     {cart.map((item) => (
                         <div key={item._id} className="flex justify-between items-center mb-2">
                             <span>{item.name} x {item.quantity}</span>
-                            <span>{(item.price * item.quantity).toFixed(2)}€</span>
+                            <span>${(item.price * item.quantity).toFixed(2)}</span>
                         </div>
                     ))}
                     <div className="border-t mt-4 pt-4">
                         <div className="flex justify-between font-bold">
                             <span>Total</span>
-                            <span>{total.toFixed(2)}€</span>
+                            <span>${total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -94,7 +94,7 @@ export default function GuestCheckout() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="votre@email.com"
+                                placeholder="your@email.com"
                             />
                         </div>
 
@@ -105,7 +105,7 @@ export default function GuestCheckout() {
                                 loading ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                         >
-                            {loading ? 'Traitement...' : 'Payer maintenant'}
+                            {loading ? 'Processing...' : 'Pay Now'}
                         </button>
                     </form>
                 </div>

@@ -49,7 +49,7 @@ export default function OrdersAdmin() {
         return (
             <AdminLayout>
                 <div className="container mx-auto px-6 py-8">
-                    <p>Chargement des commandes...</p>
+                    <p>Loading orders...</p>
                 </div>
             </AdminLayout>
         );
@@ -67,19 +67,19 @@ export default function OrdersAdmin() {
     return (
         <AdminLayout>
             <div className="container mx-auto px-6 py-8">
-                <h1 className="text-2xl font-semibold mb-6">Gestion des Commandes</h1>
+                <h1 className="text-2xl font-semibold mb-6">Order Management</h1>
                 
                 {orders.length === 0 ? (
-                    <p>Aucune commande trouvée</p>
+                    <p>No orders found</p>
                 ) : (
                     <Card className="overflow-x-auto">
                         <table className="w-full whitespace-nowrap">
                             <thead>
                                 <tr className="text-left font-bold">
-                                    <th className="px-6 py-3 border-b">ID Commande</th>
-                                    <th className="px-6 py-3 border-b">Client</th>
+                                    <th className="px-6 py-3 border-b">Order ID</th>
+                                    <th className="px-6 py-3 border-b">Customer</th>
                                     <th className="px-6 py-3 border-b">Total</th>
-                                    <th className="px-6 py-3 border-b">Statut</th>
+                                    <th className="px-6 py-3 border-b">Status</th>
                                     <th className="px-6 py-3 border-b">Date</th>
                                     <th className="px-6 py-3 border-b">Actions</th>
                                 </tr>
@@ -108,7 +108,7 @@ export default function OrdersAdmin() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <Button className="mr-2">
-                                                Détails
+                                                Details
                                             </Button>
                                         </td>
                                     </tr>

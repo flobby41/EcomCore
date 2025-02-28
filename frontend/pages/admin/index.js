@@ -71,25 +71,25 @@ export default function AdminDashboard() {
       <div className="p-8">
         {/* En-tête du Dashboard */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Tableau de bord</h1>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
           <div className="flex gap-2">
             <Button 
               variant={timeRange === 'day' ? 'default' : 'outline'}
               onClick={() => setTimeRange('day')}
             >
-              Jour
+              Day
             </Button>
             <Button 
               variant={timeRange === 'week' ? 'default' : 'outline'}
               onClick={() => setTimeRange('week')}
             >
-              Semaine
+              Week
             </Button>
             <Button 
               variant={timeRange === 'month' ? 'default' : 'outline'}
               onClick={() => setTimeRange('month')}
             >
-              Mois
+              Month
             </Button>
           </div>
         </div>
@@ -98,11 +98,11 @@ export default function AdminDashboard() {
         <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Chiffre d'affaires</CardTitle>
+              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardData?.revenue.total}€</div>
+              <div className="text-2xl font-bold">${dashboardData?.revenue.total}</div>
               <div className="flex items-center text-xs">
                 {dashboardData?.revenue.trend > 0 ? (
                   <ArrowUp className="h-4 w-4 text-green-500" />
@@ -112,14 +112,14 @@ export default function AdminDashboard() {
                 <span className={dashboardData?.revenue.trend > 0 ? "text-green-500" : "text-red-500"}>
                   {Math.abs(dashboardData?.revenue.trend)}%
                 </span>
-                <span className="text-muted-foreground ml-1">vs période précédente</span>
+                <span className="text-muted-foreground ml-1">vs previous period</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Commandes</CardTitle>
+              <CardTitle className="text-sm font-medium">Orders</CardTitle>
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
         <div className="grid gap-6 mb-8 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Ventes sur la période</CardTitle>
+              <CardTitle>Sales Over Time</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
@@ -164,7 +164,7 @@ export default function AdminDashboard() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Commandes récentes</CardTitle>
+              <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -172,8 +172,8 @@ export default function AdminDashboard() {
                   <thead>
                     <tr className="text-left">
                       <th className="pb-4">ID</th>
-                      <th className="pb-4">Client</th>
-                      <th className="pb-4">Montant</th>
+                      <th className="pb-4">Customer</th>
+                      <th className="pb-4">Amount</th>
                       <th className="pb-4">Status</th>
                     </tr>
                   </thead>
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
                       <tr key={order.id} className="border-t">
                         <td className="py-4">{order.id}</td>
                         <td className="py-4">{order.customer}</td>
-                        <td className="py-4">{order.amount}€</td>
+                        <td className="py-4">${order.amount}</td>
                         <td className="py-4">
                           <span className={`px-2 py-1 rounded-full text-xs ${order.status.color}`}>
                             {order.status.text}
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
         <div className="mb-8">
           <Card>
             <CardHeader>
-              <CardTitle>Alertes</CardTitle>
+              <CardTitle>Alerts</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -218,7 +218,7 @@ export default function AdminDashboard() {
                 {dashboardData?.alerts.length === 0 && (
                   <div className="p-4 rounded-lg flex items-center gap-3 bg-green-50 text-green-800">
                     <CheckCircle className="h-5 w-5" />
-                    <span>Aucune alerte à signaler</span>
+                    <span>No alerts to display</span>
                   </div>
                 )}
               </div>

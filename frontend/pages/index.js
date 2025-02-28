@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import Layout from "@/components/Layout";
 
 export default function Home() {
   return (
@@ -26,27 +24,27 @@ export default function Home() {
 
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <span className="text-4xl mb-4 block">🚚</span>
+          <div className="text-center h-full">
+            <div className="bg-white p-6 rounded-lg shadow-md h-full flex flex-col items-center justify-center">
+              <span className="text-4xl mb-4">🚚</span>
               <h3 className="text-xl font-semibold mb-4">Fast Shipping</h3>
               <p className="text-gray-600">
                 Get your products delivered quickly and securely
               </p>
             </div>
           </div>
-          <div className="text-center">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <span className="text-4xl mb-4 block">⭐</span>
+          <div className="text-center h-full">
+            <div className="bg-white p-6 rounded-lg shadow-md h-full flex flex-col items-center justify-center">
+              <span className="text-4xl mb-4">⭐</span>
               <h3 className="text-xl font-semibold mb-4">Quality Products</h3>
               <p className="text-gray-600">
                 Carefully selected items for your satisfaction
               </p>
             </div>
           </div>
-          <div className="text-center">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <span className="text-4xl mb-4 block">💬</span>
+          <div className="text-center h-full">
+            <div className="bg-white p-6 rounded-lg shadow-md h-full flex flex-col items-center justify-center">
+              <span className="text-4xl mb-4">💬</span>
               <h3 className="text-xl font-semibold mb-4">24/7 Support</h3>
               <p className="text-gray-600">
                 Our team is here to help you anytime

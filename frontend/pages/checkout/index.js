@@ -12,14 +12,14 @@ export default function Checkout() {
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     useEffect(() => {
-        // Vérifier l'authentification
+        // Check authentication
         const token = localStorage.getItem('token');
         if (!token) {
             router.push('/login');
             return;
         }
 
-        // Vérifier si le panier est vide
+        // Check if cart is empty
         if (cart.length === 0) {
             router.push('/cart');
             return;
@@ -51,7 +51,7 @@ export default function Checkout() {
             console.log("📦 Response data:", data);
 
             if (!response.ok) {
-                throw new Error(data.message || 'Erreur lors de la création de la commande');
+                throw new Error(data.message || 'Error creating order');
             }
             
             if (data.url) {
@@ -59,8 +59,8 @@ export default function Checkout() {
                 window.location.href = data.url;
             }
         } catch (error) {
-            console.error("❌ Erreur détaillée:", error);
-            toast.error(error.message || "Erreur lors de la commande");
+            console.error("❌ Detailed error:", error);
+            toast.error(error.message || "Error processing order");
         } finally {
             setLoading(false);
         }
@@ -69,9 +69,9 @@ export default function Checkout() {
     if (cart.length === 0) {
         return (
             <div className="container mx-auto p-4">
-                <p>Votre panier est vide</p>
+                <p>Your cart is empty</p>
                 <Link href="/products" className="text-blue-500 hover:underline">
-                    Retour aux produits
+                    Back to products
                 </Link>
             </div>
         );
@@ -79,10 +79,10 @@ export default function Checkout() {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Finaliser votre commande</h1>
+            <h1 className="text-2xl font-bold mb-4">Complete your order</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Résumé des produits */}
+                {/* Products summary */}
                 <div className="md:col-span-2 space-y-4">
                     {cart.map((item) => (
                         <div key={item._id} className="flex items-center justify-between border p-4 rounded">
@@ -90,23 +90,23 @@ export default function Checkout() {
                                 <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded" />
                                 <div>
                                     <h3 className="font-semibold">{item.name}</h3>
-                                    <p className="text-gray-600">{item.price}€ x {item.quantity}</p>
+                                    <p className="text-gray-600">${item.price} x {item.quantity}</p>
                                 </div>
                             </div>
                             <div className="font-semibold">
-                                {(item.price * item.quantity).toFixed(2)}€
+                                ${(item.price * item.quantity).toFixed(2)}
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Résumé et paiement */}
+                {/* Summary and payment */}
                 <div className="bg-gray-50 p-4 rounded h-fit">
-                    <h2 className="text-xl font-semibold mb-4">Résumé</h2>
+                    <h2 className="text-xl font-semibold mb-4">Summary</h2>
                     <div className="space-y-2 mb-4">
                         <div className="flex justify-between">
                             <span>Total</span>
-                            <span className="font-bold">{total.toFixed(2)}€</span>
+                            <span className="font-bold">${total.toFixed(2)}</span>
                         </div>
                     </div>
 
@@ -117,7 +117,7 @@ export default function Checkout() {
                             loading ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                     >
-                        {loading ? 'Traitement...' : 'Payer maintenant'}
+                        {loading ? 'Processing...' : 'Pay Now'}
                     </button>
                 </div>
             </div>
