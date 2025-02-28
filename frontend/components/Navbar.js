@@ -64,9 +64,9 @@ export default function Navbar() {
             <div className="container mx-auto flex justify-between">
                 <Link href="/" className="text-xl font-bold">VogueLine</Link>
                 <div>
-                    <Link href="/products" className="mx-4">Produits</Link>
-                    <Link href="/cart" className="mx-4 relative">
-                        🛒 Panier
+                    <Link href="/products" className="mx-4 hover:text-gray-300">Products</Link>
+                    <Link href="/cart" className="mx-4 hover:text-gray-300 relative">
+                        🛒 Cart
                         {cart.length > 0 && (
                             <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                                 {cart.reduce((total, item) => total + item.quantity, 0)}
@@ -76,24 +76,24 @@ export default function Navbar() {
 
                     {isAuthenticated ? (
                         <>
-                            <Link href="/orders" className="mx-4">📦 Mes Commandes</Link>
+                            <Link href="/orders" className="mx-4 hover:text-gray-300">📦 My Orders</Link>
                             <button 
                                 onClick={handleLogout} 
                                 className="mx-4 bg-red-500 px-4 py-2 rounded hover:bg-red-700 transition"
                             >
-                                Se Déconnecter
+                                Sign Out
                             </button>
                         </>
                     ) : (
                         <>
-                            <Link href="/login" className="mx-4">Se Connecter</Link>
-                            <Link href="/register" className="mx-4">S'inscrire</Link>
+                            <Link href="/login" className="mx-4 hover:text-gray-300">Sign In</Link>
+                            <Link href="/register" className="mx-4 hover:text-gray-300">Sign Up</Link>
                             {cart.length > 0 && (
                                 <Link 
                                     href="/checkout/guest" 
                                     className="mx-4 bg-green-500 px-4 py-2 rounded hover:bg-green-600 transition"
                                 >
-                                    Commander en tant qu'invité
+                                    Guest Checkout
                                 </Link>
                             )}
                         </>

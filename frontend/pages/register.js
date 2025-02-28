@@ -25,7 +25,7 @@ export default function Register() {
         e.preventDefault();
         
         if (formData.password !== formData.confirmPassword) {
-            toast.error("Les mots de passe ne correspondent pas");
+            toast.error("Passwords do not match");
             return;
         }
 
@@ -45,13 +45,13 @@ export default function Register() {
             const data = await res.json();
 
             if (res.ok) {
-                toast.success("Inscription réussie !");
+                toast.success("Registration successful!");
                 router.push("/login");
             } else {
-                toast.error(data.message || "Erreur lors de l'inscription.");
+                toast.error(data.message || "Error during registration.");
             }
         } catch (error) {
-            toast.error("Erreur lors de l'inscription.");
+            toast.error("Error during registration.");
         } finally {
             setIsLoading(false);
         }
@@ -61,12 +61,12 @@ export default function Register() {
         <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Créer un compte
+                    Create an account
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600">
-                    Ou{' '}
+                    Or{' '}
                     <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                        connectez-vous à votre compte existant
+                        sign in to your existing account
                     </Link>
                 </p>
             </div>
@@ -76,7 +76,7 @@ export default function Register() {
                     <form className="space-y-6" onSubmit={handleRegister}>
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                Nom complet
+                                Full name
                             </label>
                             <div className="mt-1">
                                 <input
@@ -94,7 +94,7 @@ export default function Register() {
 
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Adresse email
+                                Email address
                             </label>
                             <div className="mt-1">
                                 <input
@@ -112,7 +112,7 @@ export default function Register() {
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                Mot de passe
+                                Password
                             </label>
                             <div className="mt-1">
                                 <input
@@ -129,7 +129,7 @@ export default function Register() {
 
                         <div>
                             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                                Confirmer le mot de passe
+                                Confirm password
                             </label>
                             <div className="mt-1">
                                 <input
@@ -150,7 +150,7 @@ export default function Register() {
                                 disabled={isLoading}
                                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                             >
-                                {isLoading ? "Création en cours..." : "Créer un compte"}
+                                {isLoading ? "Creating account..." : "Create account"}
                             </button>
                         </div>
                     </form>

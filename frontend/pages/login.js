@@ -29,13 +29,13 @@ export default function Login() {
             if (response.ok) {
                 localStorage.setItem("token", data.token);
                 await loadCart();
-                toast.success('Connexion réussie !');
+                toast.success('Successfully signed in!');
                 router.push("/products");
             } else {
-                toast.error(data.message || "Erreur lors de la connexion");
+                toast.error(data.message || "Error signing in");
             }
         } catch (error) {
-            toast.error("Erreur lors de la connexion");
+            toast.error("Error signing in");
         } finally {
             setIsLoading(false);
         }
@@ -45,12 +45,12 @@ export default function Login() {
         <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Connexion à votre compte
+                    Sign in to your account
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600">
-                    Ou{' '}
+                    Or{' '}
                     <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                        créez un nouveau compte
+                        create a new account
                     </Link>
                 </p>
             </div>
@@ -60,7 +60,7 @@ export default function Login() {
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Adresse email
+                                Email address
                             </label>
                             <div className="mt-1">
                                 <input
@@ -78,7 +78,7 @@ export default function Login() {
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                Mot de passe
+                                Password
                             </label>
                             <div className="mt-1">
                                 <input
@@ -103,13 +103,13 @@ export default function Login() {
                                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                 />
                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                                    Se souvenir de moi
+                                    Remember me
                                 </label>
                             </div>
 
                             <div className="text-sm">
                                 <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                                    Mot de passe oublié ?
+                                    Forgot your password?
                                 </a>
                             </div>
                         </div>
@@ -120,7 +120,7 @@ export default function Login() {
                                 disabled={isLoading}
                                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                             >
-                                {isLoading ? 'Connexion...' : 'Se connecter'}
+                                {isLoading ? 'Signing in...' : 'Sign in'}
                             </button>
                         </div>
                     </form>

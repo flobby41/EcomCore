@@ -43,7 +43,7 @@ export default function ProductDetail() {
                         onClick={handleAddToCart}
                         className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition transform active:scale-95"
                     >
-                        Ajouter au panier
+                        Add to Cart
                     </button>
                 </div>
             </div>
