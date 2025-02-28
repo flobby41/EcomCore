@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Cookies from 'js-cookie'; // Utilisation de js-cookie pour gérer les cookies
 
@@ -6,6 +6,23 @@ import Cookies from 'js-cookie'; // Utilisation de js-cookie pour gérer les coo
 export default function AdminLogin() {
     const [credentials, setCredentials] = useState({ email: '', password: '' });
     const router = useRouter();
+
+    // Vérifier si déjà connecté
+    useEffect(() => {
+        const adminToken = Cookies.get('adminToken');
+        if (adminToken && !router.query.logout) {
+            router.push('/admin');
+        }
+    }, [router]);
+
+    // Gérer le logout
+    useEffect(() => {
+        if (router.query.logout) {
+            Cookies.remove('adminToken');
+            localStorage.removeItem('adminToken');
+            router.replace('/admin/login');
+        }
+    }, [router.query.logout]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,14 +35,16 @@ export default function AdminLogin() {
 
             if (response.ok) {
                 const { token } = await response.json();
-                console.log('Token reçu:', token);
-                localStorage.setItem('adminToken', token); // Token spécifique admin
-                Cookies.set('adminToken', token, { expires: 1 }); // Expires in 1 day
-
+                localStorage.setItem('adminToken', token);
+                Cookies.set('adminToken', token, { expires: 1 });
                 router.push('/admin');
+            } else {
+                const error = await response.json();
+                alert(error.message || 'Login failed');
             }
         } catch (error) {
-            console.error('Erreur de connexion:', error);
+            console.error('Error:', error);
+            alert('Connection error');
         }
     };
 

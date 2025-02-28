@@ -4,7 +4,7 @@ module.exports = (req, res, next) => {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Accès non autorisé" });
+        return res.status(401).json({ message: "Unauthorized access" });
     }
 
     const token = authHeader.split(" ")[1];
@@ -12,13 +12,13 @@ module.exports = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded.isAdmin) {
-            return res.status(403).json({ message: "Accès réservé aux administrateurs" });
+            return res.status(403).json({ message: "Access restricted to administrators" });
         }
 
-        req.admin = decoded; // ✅ Ajoute l'admin à la requête
-        next(); // 🔥 Passe à la route suivante
+        req.admin = decoded;
+        next();
     } catch (error) {
-        console.error("❌ Erreur de vérification du token admin:", error);
-        res.status(403).json({ message: "Token invalide" });
+        console.error("❌ Admin token verification error:", error);
+        res.status(403).json({ message: "Invalid token" });
     }
 };

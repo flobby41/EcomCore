@@ -12,6 +12,14 @@ console.log('admintoken coté middleware : ', adminToken)
         }
     }
 
+    // Si on est connecté en tant qu'admin et qu'on essaie d'accéder à /admin/login
+    if (request.nextUrl.pathname === '/admin/login') {
+        const adminToken = request.cookies.get('adminToken');
+        if (adminToken && !request.nextUrl.searchParams.has('logout')) {
+            return NextResponse.redirect(new URL('/admin', request.url));
+        }
+    }
+
     return NextResponse.next();
 }
 

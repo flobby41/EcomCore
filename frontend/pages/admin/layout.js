@@ -1,16 +1,29 @@
 import { useState } from "react";
-import { BarChart3, ShoppingCart, Users, Package, Sun, Moon, Menu, X } from "lucide-react";
+import { BarChart3, ShoppingCart, Users, Package, Sun, Moon, Menu, X, LayoutDashboard, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function AdminLayout({ children }) {
     const [darkMode, setDarkMode] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const router = useRouter();
 
     const toggleDarkMode = () => {
         setDarkMode(!darkMode);
         document.documentElement.classList.toggle("dark");
     };
+
+    const handleLogout = () => {
+        router.push('/admin/login?logout=true');
+    };
+
+    const navigation = [
+        { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+        { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+        { name: 'Customers', href: '/admin/customers', icon: Users },
+        { name: 'Products', href: '/admin/products', icon: Package },
+    ];
 
     return (
         <div className={`flex h-screen bg-gray-100 ${darkMode ? "dark" : ""}`}>
@@ -26,23 +39,25 @@ export default function AdminLayout({ children }) {
                     </Button>
                 </div>
                 <nav className="mt-6">
-                    <Link href="/admin" className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <BarChart3 className="h-5 w-5 mr-3" />
-                        Dashboard
-                    </Link>
-                    <Link href="/admin/orders" className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <ShoppingCart className="h-5 w-5 mr-3" />
-                        Orders
-                    </Link>
-                    <Link href="/admin/customers" className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <Users className="h-5 w-5 mr-3" />
-                        Customers
-                    </Link>
-                    <Link href="/admin/products" className="flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <Package className="h-5 w-5 mr-3" />
-                        Products
-                    </Link>
+                    {navigation.map((item) => {
+                        const isActive = router.pathname === item.href;
+                        return (
+                            <Link key={item.name} href={item.href} className={`flex items-center px-6 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${isActive ? 'bg-blue-50 text-blue-700' : ''}`}>
+                                <item.icon className="h-5 w-5 mr-3" />
+                                {item.name}
+                            </Link>
+                        );
+                    })}
                 </nav>
+                <div className="p-4 border-t">
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                    >
+                        <LogOut className="w-5 h-5 mr-3" />
+                        Logout
+                    </button>
+                </div>
             </div>
 
             {/* Main Content */}
