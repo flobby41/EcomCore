@@ -24,10 +24,10 @@ export default function Cart() {
     if (cart.length === 0) {
         return (
             <div className="container mx-auto p-4">
-                <h1 className="text-2xl font-bold mb-4">Votre panier</h1>
-                <p>Votre panier est vide</p>
+                <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
+                <p>Your cart is empty</p>
                 <Link href="/products" className="text-blue-500 hover:underline">
-                    Voir nos produits
+                    View our products
                 </Link>
             </div>
         );
@@ -35,7 +35,7 @@ export default function Cart() {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">Votre panier</h1>
+            <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Liste des produits */}
@@ -46,7 +46,7 @@ export default function Cart() {
                                 <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded" />
                                 <div>
                                     <h3 className="font-semibold">{item.name}</h3>
-                                    <p className="text-gray-600">{item.price}€</p>
+                                    <p className="text-gray-600">${item.price}</p>
                                 </div>
                             </div>
                             <div className="flex items-center space-x-4">
@@ -69,7 +69,7 @@ export default function Cart() {
                                     onClick={() => removeFromCart(item._id)}
                                     className="text-red-500 hover:text-red-700"
                                 >
-                                    Supprimer
+                                    Remove
                                 </button>
                             </div>
                         </div>
@@ -78,11 +78,11 @@ export default function Cart() {
 
                 {/* Résumé et actions */}
                 <div className="bg-gray-50 p-4 rounded h-fit">
-                    <h2 className="text-xl font-semibold mb-4">Résumé</h2>
+                    <h2 className="text-xl font-semibold mb-4">Summary</h2>
                     <div className="space-y-2 mb-4">
                         <div className="flex justify-between">
                             <span>Total</span>
-                            <span className="font-bold">{total.toFixed(2)}€</span>
+                            <span className="font-bold">${total.toFixed(2)}</span>
                         </div>
                     </div>
 
@@ -91,7 +91,7 @@ export default function Cart() {
                             href="/checkout" 
                             className="w-full bg-blue-500 text-white py-2 px-4 rounded block text-center hover:bg-blue-600 transition"
                         >
-                            Passer la commande
+                            Proceed to Checkout
                         </Link>
                     ) : (
                         <div className="space-y-2">
@@ -99,13 +99,13 @@ export default function Cart() {
                                 href="/login" 
                                 className="w-full bg-blue-500 text-white py-2 px-4 rounded block text-center hover:bg-blue-600 transition"
                             >
-                                Se connecter pour commander
+                                Sign in to Checkout
                             </Link>
                             <Link 
                                 href="/checkout/guest" 
                                 className="w-full bg-green-500 text-white py-2 px-4 rounded block text-center hover:bg-green-600 transition"
                             >
-                                Commander en tant qu'invité
+                                Guest Checkout
                             </Link>
                         </div>
                     )}
