@@ -15,20 +15,48 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connecté'))
   .catch((err) => console.error(err));
 
+// Définir les catégories possibles
+const categories = [
+  'Electronics',
+  'Clothing',
+  'Home & Garden',
+  'Sports',
+  'Books',
+  'Toys',
+  'Beauty',
+  'Jewelry',
+  'Automotive',
+  'Office'
+];
+
+// Définir les utilisateurs avec leurs mots de passe
+const usersList = [
+  { name: 'Admin User', email: 'admin@example.com', password: 'admin123', isAdmin: true },
+  { name: 'John Doe', email: 'john@example.com', password: 'user123', isAdmin: false },
+  { name: 'Jane Smith', email: 'jane@example.com', password: 'user123', isAdmin: false },
+  { name: 'Bob Wilson', email: 'bob@example.com', password: 'user123', isAdmin: false },
+  { name: 'Alice Brown', email: 'alice@example.com', password: 'user123', isAdmin: false }
+];
+
 // Fonction pour générer des produits
-const generateProducts = (count = 20) => {
+const generateProducts = (count) => {
   const products = [];
+  
   for (let i = 0; i < count; i++) {
-    products.push({
+    const product = {
       name: faker.commerce.productName(),
       description: faker.commerce.productDescription(),
-      price: faker.commerce.price(),
-      category: faker.commerce.department(),
-      stock: faker.number.int({ min: 0, max: 100 }),
+      price: parseFloat(faker.commerce.price({ min: 10, max: 1000 })),
       image: faker.image.url(),
-      slug: faker.helpers.slugify(faker.commerce.productName()),
-    });
+      stock: faker.number.int({ min: 0, max: 100 }),
+      // Ajouter une catégorie aléatoire
+      category: faker.helpers.arrayElement(categories),
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    };
+    products.push(product);
   }
+  
   return products;
 };
 
@@ -109,40 +137,76 @@ const generateOrders = async (users, products, count = 15) => {
 // Fonction principale de seed
 const seedDatabase = async () => {
   try {
-    // Nettoyage des collections
-    await Product.deleteMany();
-    await User.deleteMany();
-    await Order.deleteMany();
+    console.log('🌱 Seeding database...');
+    
+    // Supprimer les données existantes
+    await Product.deleteMany({});
+    await Order.deleteMany({});
+    await User.deleteMany({});
 
-    // Génération et insertion dans l'ordre
-    const products = await Product.insertMany(generateProducts());
-    
-    // Générer et insérer les utilisateurs
-    const users = await generateUsers();
-    const insertedUsers = await User.insertMany(users);
-    
-    // Générer et insérer les commandes avec les utilisateurs insérés
-    const orders = await generateOrders(insertedUsers, products);
+    // 1. Créer les produits
+    const products = Array(20).fill().map(() => ({
+      name: faker.commerce.productName(),
+      description: faker.commerce.productDescription(),
+      price: parseFloat(faker.commerce.price({ min: 10, max: 1000 })),
+      image: faker.image.url(),
+      stock: faker.number.int({ min: 0, max: 100 }),
+      category: faker.helpers.arrayElement(categories),
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    }));
+
+    const savedProducts = await Product.insertMany(products);
+    console.log('✅ Products seeded');
+
+    // 2. Créer les utilisateurs avec logs
+    const users = usersList.map(user => ({
+      ...user,
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    }));
+
+    console.log('\n👥 User Credentials:');
+    users.forEach(user => {
+      console.log(`\n${user.isAdmin ? '👑 Admin' : '👤 User'}:`);
+      console.log(`Name: ${user.name}`);
+      console.log(`Email: ${user.email}`);
+      console.log(`Password: ${user.password}`);
+    });
+    console.log('\n');
+
+    const savedUsers = await User.insertMany(users);
+    console.log('✅ Users seeded');
+
+    // 3. Créer les commandes
+    const orders = Array(15).fill().map(() => {
+      const numItems = faker.number.int({ min: 1, max: 4 });
+      const selectedProducts = faker.helpers.arrayElements(savedProducts, numItems);
+      const user = faker.helpers.arrayElement(savedUsers);
+      
+      return {
+        userId: user._id,
+        email: user.email,
+        items: selectedProducts.map(product => ({
+          productId: product._id,
+          quantity: faker.number.int({ min: 1, max: 5 }),
+          price: product.price
+        })),
+        status: faker.helpers.arrayElement(['pending', 'paid', 'cancelled', 'delivered']),
+        stripeSessionId: faker.string.uuid(),
+        isGuestOrder: false,
+        createdAt: faker.date.past(),
+        updatedAt: faker.date.recent()
+      };
+    });
+
     await Order.insertMany(orders);
+    console.log('✅ Orders seeded');
 
-    console.log('Database successfully seeded');
-    console.log('Utilisateur test ajouté : Email -> john@example.com | Password -> Test@1234');
-    console.log('📢 Voici quelques utilisateurs générés avec leurs mots de passe en clair :');
-    users.slice(0, 5).forEach(user => {
-      console.log(`📧 Email: ${user.email} | 🔑 Password: ${user.rawPassword}`);
-    });
-
-
-    // Vérification de tous les utilisateurs après insertion
-    const allUsers = await User.find();
-    console.log('Vérification des utilisateurs en base de données :');
-    allUsers.slice(0, 5).forEach(user => {
-      console.log(`Email: ${user.email} | Password Hash: ${user.password}`);
-    });
-    
-    process.exit();
-  } catch (err) {
-    console.error(err);
+    console.log('✅ Database seeding completed successfully!');
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Seeding failed:', error);
     process.exit(1);
   }
 };

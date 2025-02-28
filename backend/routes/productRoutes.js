@@ -3,6 +3,7 @@ const router = express.Router();
 const Product = require("../models/Product");
 
 
+// api/products 
 // Route pour récupérer les produits phares (limités à 6 par exemple)
 router.get("/featured", async (req, res) => {
   try {
@@ -11,6 +12,18 @@ router.get("/featured", async (req, res) => {
   } catch (error) {
       console.error("Erreur lors de la récupération des produits :", error);
       res.status(500).json({ message: "Erreur lors de la récupération du produit", error });
+  }
+});
+
+// ➤ Récupérer tous les produits (GET /api/products)
+router.get("/", async (req, res) => {
+  try {
+      const { category } = req.query;
+      const filter = category && category !== 'all' ? { category } : {};
+      const products = await Product.find(filter);
+      res.json(products);
+  } catch (error) {
+      res.status(500).json({ message: "Erreur lors de la récupération des produits", error });
   }
 });
 
@@ -26,14 +39,17 @@ router.post("/", async (req, res) => {
     }
 });
 
-// ➤ Récupérer tous les produits (GET /api/products)
-router.get("/", async (req, res) => {
-    try {
-        const products = await Product.find();
-        res.status(200).json(products);
-    } catch (error) {
-        res.status(500).json({ message: "Erreur lors de la récupération des produits", error });
-    }
+
+// Route pour obtenir toutes les catégories uniques
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = await Product.distinct('category');
+    // S'assurer que categories est un tableau
+    res.json(Array.isArray(categories) ? categories : []);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ message: 'Error fetching categories' });
+  }
 });
 
 // ➤ Récupérer un produit par ID (GET /api/products/:id)
