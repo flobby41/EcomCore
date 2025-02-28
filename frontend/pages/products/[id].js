@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useCart } from "../../context/CartContext";
+import ReviewsList from '../../components/ReviewsList';
 
 export default function ProductDetail() {
     const router = useRouter();
@@ -46,6 +47,7 @@ export default function ProductDetail() {
                     </button>
                 </div>
             </div>
+            <ReviewsList productId={product._id} />
         </div>
     );
 }
