@@ -17,12 +17,16 @@ const authMiddleware = (req, res, next) => {
 
         // ✅ Vérifier d'abord si c'est un token admin
         try {
-      
-          console.log("🔑 JWT_SECRET:", process.env.JWT_SECRET);
+            console.log("🔑 JWT_SECRET:", process.env.JWT_SECRET);
             const adminDecoded = jwt.verify(token, process.env.JWT_SECRET);
             if (adminDecoded.isAdmin === true) {
                 console.log("✅ Token admin vérifié avec succès");
-                req.user = adminDecoded;
+                req.user = {
+                    id: adminDecoded.userId || adminDecoded.id,
+                    email: adminDecoded.email,
+                    name: adminDecoded.name,
+                    isAdmin: true
+                };
                 return next();
             }
         } catch (adminError) {
@@ -33,13 +37,19 @@ const authMiddleware = (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log("✅ Token décodé:", decoded);
 
-        if (!decoded.userId) {
+        if (!decoded.userId && !decoded.id) {
             console.log("❌ Token décodé mais sans ID:", decoded);
             return res.status(401).json({ message: "Utilisateur non authentifié" });
         }
 
-        req.user = { id: decoded.userId, email: decoded.email  }; // Uniformiser l'accès à l'ID utilisateur
+        // Uniformiser l'accès à l'ID utilisateur et inclure le nom s'il existe
+        req.user = { 
+            id: decoded.userId || decoded.id, 
+            email: decoded.email,
+            name: decoded.name || decoded.username || null
+        };
 
+        console.log("👤 Utilisateur authentifié:", req.user);
         next();
     } catch (error) {
         console.error("❌ Erreur d'authentification:", error);

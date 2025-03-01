@@ -24,9 +24,16 @@ router.post("/register", async (req, res) => {
       const newUser = new User({ name, email: email.toLowerCase(), password: hashedPassword });
       await newUser.save();
 
-      const token = jwt.sign({ userId: newUser._id, email: newUser.email }, process.env.JWT_SECRET, {
-          expiresIn: "7d",
-      });
+      // ✅ Inclure le nom dans le token JWT
+      const token = jwt.sign(
+          { 
+              id: newUser._id, 
+              email: newUser.email,
+              name: newUser.name 
+          }, 
+          process.env.JWT_SECRET, 
+          { expiresIn: "7d" }
+      );
 
       res.status(201).json({ message: "Utilisateur créé avec succès", token });
   } catch (error) {
@@ -52,17 +59,24 @@ router.post('/login', async (req, res) => {
       if (!isMatch) {
           return res.status(400).json({ message: "Invalid credentials" });
       }
- // Générer un token JWT
- const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+      
+      // ✅ Générer un token JWT avec le nom de l'utilisateur
+      const token = jwt.sign(
+          { 
+              id: user._id, 
+              email: user.email,
+              name: user.name 
+          }, 
+          process.env.JWT_SECRET, 
+          { expiresIn: process.env.JWT_EXPIRES_IN }
+      );
  
- res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+      res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
 
   } catch (err) {
       console.error("❌ Erreur serveur :", err);
       res.status(500).json({ message: "Server error" });
   }
 });
-
-
 
 module.exports = { router };
