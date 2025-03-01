@@ -13,38 +13,82 @@ export const CartProvider = ({ children }) => {
 
     const loadCart = async () => {
         const token = localStorage.getItem("token");
+        console.log("🔄 Début du chargement du panier, token présent:", !!token);
+        
         if (token) {
             try {
                 const headers = {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 };
-
+                
+                console.log("📤 Envoi de la requête au panier...");
                 const response = await fetch("http://localhost:5001/api/cart", {
                     headers
                 });
-
+                
+                console.log("📥 Réponse reçue, statut:", response.status);
+                
                 if (response.ok) {
                     const data = await response.json();
-                    const transformedItems = data.items.map(item => ({
-                        _id: item.productId._id,
-                        name: item.productId.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        image: item.productId.image
-                    }));
-                    setCart(transformedItems);
+                    console.log("🔑 Données reçues du panier:", data);
+                    
+                    if (data && data.items && Array.isArray(data.items)) {
+                        console.log("🔑 Items du panier:", data.items);
+                        const transformedItems = data.items.map(item => {
+                            // Vérifier si productId est un objet (après population) ou juste un ID
+                            const isPopulated = typeof item.productId === 'object' && item.productId !== null;
+                            
+                            return {
+                                _id: isPopulated ? item.productId._id : item.productId,
+                                name: isPopulated ? item.productId.name : item.productName,
+                                price: item.price,
+                                quantity: item.quantity,
+                                image: isPopulated && item.productId.image ? item.productId.image : '/placeholder-image.jpg'
+                            };
+                        });
+                        setCart(transformedItems);
+                    } else {
+                        console.warn("⚠️ Format de données inattendu:", data);
+                        setCart([]);
+                    }
+                } else {
+                    console.error("❌ Erreur API:", response.status);
+                    // Si erreur 401 (non autorisé) ou 404 (non trouvé), vider le panier
+                    if (response.status === 401 || response.status === 404) {
+                        setCart([]);
+                    }
                 }
             } catch (error) {
-                console.error("Erreur lors du chargement du panier:", error);
+                console.error("❌ Exception lors du chargement du panier:", error);
+                // Ne pas modifier l'état du panier en cas d'erreur réseau
             }
         } else {
-            // Pour les invités, ne pas envoyer d'en-tête Authorization du tout
+            // Pour les invités, charger depuis localStorage
             const savedCart = localStorage.getItem("cart");
+            console.log("�� Panier local trouvé:", !!savedCart);
+            
             if (savedCart) {
-                setCart(JSON.parse(savedCart));
+                try {
+                    const parsedCart = JSON.parse(savedCart);
+                    if (Array.isArray(parsedCart)) {
+                        setCart(parsedCart);
+                        console.log("�� Panier local chargé, items:", parsedCart.length);
+                    } else {
+                        console.warn("⚠️ Format de panier local invalide");
+                        localStorage.removeItem("cart");
+                        setCart([]);
+                    }
+                } catch (e) {
+                    console.error("❌ Erreur lors du parsing du panier local:", e);
+                    localStorage.removeItem("cart");
+                    setCart([]);
+                }
+            } else {
+                setCart([]);
             }
         }
+        console.log("✅ Fin de loadCart");
     };
 
     // Charger le panier au démarrage et quand le token change
@@ -101,7 +145,7 @@ export const CartProvider = ({ children }) => {
                     setCart(transformedItems);
                 }
 
-                toast.success('Produit ajouté au panier !');
+                toast.success('Product added to cart!');
             } catch (error) {
                 console.error("Erreur:", error);
                 toast.error("Erreur de synchronisation avec le serveur");
@@ -128,8 +172,22 @@ export const CartProvider = ({ children }) => {
         const token = localStorage.getItem("token");
         
         // Mise à jour locale
-        setCart(prevCart => prevCart.filter(p => p._id !== productId));
-        toast.success('Produit retiré du panier');
+        setCart(prevCart => {
+            const updatedCart = prevCart.filter(p => p._id !== productId);
+            
+            // Pour les invités, mettre à jour localStorage immédiatement
+            if (!token) {
+                if (updatedCart.length === 0) {
+                    localStorage.removeItem("cart"); // Supprimer complètement si vide
+                } else {
+                    localStorage.setItem("cart", JSON.stringify(updatedCart));
+                }
+            }
+            
+            return updatedCart;
+        });
+        
+        toast.success('Product removed from cart');
 
         // Synchronisation avec le backend
         if (token) {
@@ -199,7 +257,10 @@ export const CartProvider = ({ children }) => {
         
         // Mise à jour locale
         setCart([]);
+        
+        // Toujours supprimer du localStorage, qu'il y ait un token ou non
         localStorage.removeItem("cart");
+        
         if (showToast) {
             toast.success('Panier vidé');
         }
