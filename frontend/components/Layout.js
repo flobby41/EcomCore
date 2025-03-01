@@ -15,7 +15,6 @@ export default function Layout({ children }) {
             <header className="bg-white dark:bg-gray-800 shadow">
                 <div className="container mx-auto px-6 py-4 flex justify-between items-center">
                     <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">
-                        SkandiWall
                     </h1>
                     <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
                         {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}

@@ -163,7 +163,7 @@ export const CartProvider = ({ children }) => {
                 }
                 return [...prevCart, { ...product, quantity: 1 }];
             });
-            toast.success('Produit ajouté au panier !');
+            toast.success('Product added to cart!');
         }
     };
 
@@ -219,7 +219,7 @@ export const CartProvider = ({ children }) => {
                 p._id === productId ? { ...p, quantity } : p
             )
         );
-        toast.success('Quantité mise à jour');
+        toast.success('Quantity updated');
 
         // Synchronisation avec le backend
         if (token) {
@@ -262,7 +262,7 @@ export const CartProvider = ({ children }) => {
         localStorage.removeItem("cart");
         
         if (showToast) {
-            toast.success('Panier vidé');
+            toast.success('Cart emptied');
         }
 
         // Synchronisation avec le backend
@@ -289,6 +289,55 @@ export const CartProvider = ({ children }) => {
         }
     };
 
+    const mergeLocalCart = async () => {
+        const token = localStorage.getItem("token");
+        const savedCart = localStorage.getItem("cart");
+        
+        if (!token || !savedCart) return;
+        
+        try {
+            // Récupérer le panier local
+            const localCart = JSON.parse(savedCart);
+            
+            if (!Array.isArray(localCart) || localCart.length === 0) {
+                localStorage.removeItem("cart");
+                return;
+            }
+            
+            console.log("🔄 Fusion du panier local avec le panier utilisateur...");
+            
+            // Transformer les items du panier local au format attendu par l'API
+            const itemsToMerge = localCart.map(item => ({
+                productId: item._id,
+                quantity: item.quantity,
+                price: item.price
+            }));
+            
+            // Appeler l'API pour fusionner les paniers
+            const response = await fetch("http://localhost:5001/api/cart/merge", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ items: itemsToMerge })
+            });
+            
+            if (response.ok) {
+                console.log("✅ Fusion du panier réussie");
+                // Supprimer le panier local après fusion réussie
+                localStorage.removeItem("cart");
+                // Recharger le panier depuis le serveur
+                await loadCart();
+                toast.success('Your cart has been restored');
+            } else {
+                console.error("❌ Erreur lors de la fusion du panier:", await response.text());
+            }
+        } catch (error) {
+            console.error("❌ Exception lors de la fusion du panier:", error);
+        }
+    };
+
     return (
       <CartContext.Provider value={{ 
         cart, 
@@ -296,7 +345,8 @@ export const CartProvider = ({ children }) => {
         removeFromCart, 
         updateQuantity, 
         clearCart,
-        loadCart
+        loadCart,
+        mergeLocalCart
     }}>
             {children}
         </CartContext.Provider>

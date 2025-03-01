@@ -9,7 +9,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
-    const { loadCart } = useCart();
+    const { loadCart, mergeLocalCart } = useCart();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,6 +29,7 @@ export default function Login() {
             if (response.ok) {
                 localStorage.setItem("token", data.token);
                 await loadCart();
+                await mergeLocalCart();
                 toast.success('Successfully signed in!');
                 router.push("/products");
             } else {
