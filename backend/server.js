@@ -12,6 +12,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const authRoutes = require("./routes/authRoutes").router;
 const userRoutes = require('./routes/userRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const passport = require('./config/passport');
 
 
 dotenv.config();
@@ -29,6 +30,9 @@ app.post("/api/webhook", express.raw({ type: 'application/json' }), handleWebhoo
 
 // Middleware express.json() APRÈS la route webhook
 app.use(express.json());
+
+// Initialiser Passport
+app.use(passport.initialize());
 
 // Routes API
 app.use("/api/auth", authRoutes);

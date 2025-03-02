@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const router = express.Router();
+const passport = require('../config/passport');
 
 // Inscription (Register)
 router.post("/register", async (req, res) => {
@@ -78,5 +79,55 @@ router.post('/login', async (req, res) => {
       res.status(500).json({ message: "Server error" });
   }
 });
+
+// Route pour l'authentification Google
+router.get('/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+// Callback après authentification Google
+router.get('/google/callback', 
+  passport.authenticate('google', { session: false, failureRedirect: '/login' }),
+  (req, res) => {
+    // Générer un token JWT
+    const token = jwt.sign(
+      { 
+        id: req.user._id, 
+        email: req.user.email,
+        name: req.user.name 
+      }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+    
+    // Modifier cette ligne pour utiliser le port 3001
+    res.redirect(`http://localhost:3001/auth/callback?token=${token}`);
+  }
+);
+
+// Route pour l'authentification Facebook
+router.get('/facebook',
+  passport.authenticate('facebook', { scope: ['email'] })
+);
+
+// Callback après authentification Facebook
+router.get('/facebook/callback',
+  passport.authenticate('facebook', { session: false, failureRedirect: '/login' }),
+  (req, res) => {
+    // Générer un token JWT
+    const token = jwt.sign(
+      { 
+        id: req.user._id, 
+        email: req.user.email,
+        name: req.user.name 
+      }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+    
+    // Modifier cette ligne pour utiliser le port 3001
+    res.redirect(`http://localhost:3001/auth/callback?token=${token}`);
+  }
+);
 
 module.exports = { router };
