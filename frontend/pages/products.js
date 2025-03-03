@@ -11,7 +11,7 @@ export default function Products() {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const { addToCart } = useCart();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const { addToWishlist, isInWishlist } = useWishlist();
+    const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
     const router = useRouter();
 
     useEffect(() => {
@@ -57,13 +57,22 @@ export default function Products() {
 
     const handleWishlistClick = async (e, product) => {
         e.preventDefault(); // Empêcher la navigation vers la page produit
+        e.stopPropagation(); // Empêcher la propagation de l'événement
         
         if (!isAuthenticated) {
             router.push('/login');
             return;
         }
 
-        await addToWishlist(product);
+        // Si le produit est déjà dans la wishlist, le supprimer
+        if (isInWishlist(product._id)) {
+            const success = await removeFromWishlist(product._id);
+            // Ne pas afficher de toast ici, car il est déjà affiché dans la fonction removeFromWishlist
+        } else {
+            // Sinon, l'ajouter
+            const success = await addToWishlist(product);
+            // Ne pas afficher de toast ici, car il est déjà affiché dans la fonction addToWishlist
+        }
     };
 
     return (

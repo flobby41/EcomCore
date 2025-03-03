@@ -8,24 +8,42 @@ export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
     const { cart, clearCart, loadCart } = useCart();
-    const { wishlist, loadWishlist } = useWishlist();
+    const { wishlist, loadWishlist, clearWishlist } = useWishlist();
 
     useEffect(() => {
-        const checkAuth = () => {
+        const checkAuth = async () => {
             const token = localStorage.getItem("token");
-            setIsAuthenticated(!!token);
+            const wasAuthenticated = isAuthenticated;
+            const isNowAuthenticated = !!token;
+            
+            setIsAuthenticated(isNowAuthenticated);
+            
+            // Si l'utilisateur vient de se connecter, charger la wishlist
+            if (!wasAuthenticated && isNowAuthenticated) {
+                await loadWishlist();
+            }
         };
 
         checkAuth();
-        loadCart();
-        loadWishlist(); // Charger la wishlist au démarrage
         
+        // Vérifier l'authentification à chaque changement de route
         router.events?.on("routeChangeComplete", checkAuth);
 
         return () => {
             router.events?.off("routeChangeComplete", checkAuth);
         };
-    }, [router.events]);
+    }, [router.events, isAuthenticated]);
+
+    // Charger la wishlist et le panier au démarrage
+    useEffect(() => {
+        const loadData = async () => {
+            if (isAuthenticated) {
+                await Promise.all([loadCart(), loadWishlist()]);
+            }
+        };
+        
+        loadData();
+    }, [isAuthenticated]);
 
     // 🔥 Fusionner le panier local avec le backend après connexion
     const handleLogin = async (token) => {
@@ -33,8 +51,9 @@ export default function Navbar() {
 
         localStorage.setItem("token", token);
         setIsAuthenticated(true);
-        console.log("🔄 Rafraîchissement du panier après connexion...");
-        await loadCart(); // ✅ Changé fetchCart en loadCart
+        
+        // Charger à la fois le panier et la wishlist après connexion
+        await Promise.all([loadCart(), loadWishlist()]);
 
         const localCart = JSON.parse(localStorage.getItem("cart")) || [];
         if (localCart.length > 0) {
@@ -58,8 +77,9 @@ export default function Navbar() {
     const handleLogout = () => {
         localStorage.removeItem("token");
         clearCart(false); // Passer false pour ne pas afficher le toast
+        clearWishlist(); // Vider la wishlist lors de la déconnexion
         setIsAuthenticated(false);
-        router.push("/login");
+        router.push("/");
     };
 
     const handleWishlistClick = (e) => {

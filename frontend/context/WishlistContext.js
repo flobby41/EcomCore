@@ -61,6 +61,7 @@ export const WishlistProvider = ({ children }) => {
             }
         } catch (error) {
             console.error("❌ Exception lors du chargement de la wishlist:", error);
+            setWishlist([]);
         } finally {
             setIsLoading(false);
         }
@@ -142,11 +143,19 @@ export const WishlistProvider = ({ children }) => {
     };
 
     const isInWishlist = (productId) => {
+        // Si l'utilisateur n'est pas connecté, retourner false
+        if (!localStorage.getItem("token")) {
+            return false;
+        }
         return wishlist.some(item => item._id === productId);
     };
 
     const isAuthenticated = () => {
         return !!localStorage.getItem("token");
+    };
+
+    const clearWishlist = () => {
+        setWishlist([]);
     };
 
     return (
@@ -156,7 +165,8 @@ export const WishlistProvider = ({ children }) => {
             removeFromWishlist, 
             loadWishlist,
             isInWishlist,
-            isLoading
+            isLoading,
+            clearWishlist
         }}>
             {children}
         </WishlistContext.Provider>
