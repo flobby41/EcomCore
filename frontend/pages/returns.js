@@ -6,6 +6,7 @@ export default function Returns() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { orderId } = router.query;
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -25,19 +26,20 @@ export default function Returns() {
                 
                 if (response.ok) {
                     const ordersData = await response.json();
-                    // Filtrer pour n'obtenir que les commandes des 30 derniers jours
-                    const thirtyDaysAgo = new Date();
-                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                    console.log("Orders retrieved:", ordersData);
                     
-                    const recentOrders = ordersData.filter(order => 
-                        new Date(order.createdAt) > thirtyDaysAgo
-                    );
+                    // Si un orderId est spécifié dans l'URL, filtrer pour n'afficher que cette commande
+                    const filteredOrders = orderId 
+                        ? ordersData.filter(order => order._id === orderId)
+                        : ordersData;
                     
-                    setOrders(recentOrders);
+                    console.log("Filtered orders:", filteredOrders);
+                    setOrders(filteredOrders);
                 } else {
                     toast.error("Failed to load orders");
                 }
             } catch (error) {
+                console.error("Error loading orders:", error);
                 toast.error("An error occurred while loading your orders");
             } finally {
                 setLoading(false);
@@ -45,7 +47,7 @@ export default function Returns() {
         };
         
         fetchOrders();
-    }, []);
+    }, [orderId, router]);
 
     const handleReturnRequest = (orderId) => {
         toast.success(`Return request initiated for order #${orderId}. Check your email for return instructions.`);
@@ -65,10 +67,10 @@ export default function Returns() {
                 <div className="px-6 py-8">
                     <h1 className="text-3xl font-bold text-gray-800 mb-6">Return an Item</h1>
                     
-                    {orders.length > 0 ? (
+                    {orders && orders.length > 0 ? (
                         <div className="space-y-8">
                             <p className="text-gray-600">
-                                Select the order containing the item you wish to return. Only orders from the last 30 days are eligible for returns.
+                                Select the order containing the item you wish to return.
                             </p>
                             
                             {orders.map(order => (
@@ -86,25 +88,69 @@ export default function Returns() {
                                     
                                     <div className="p-4">
                                         <div className="space-y-4">
-                                            {order.items.map(item => (
-                                                <div key={item._id} className="flex items-center space-x-4">
-                                                    <div className="w-16 h-16 bg-gray-200 rounded flex-shrink-0"></div>
+                                            {order.items && order.items.map((item, index) => (
+                                                <div key={item.productId || index} className="flex items-center space-x-4">
+                                                    <div className="w-16 h-16 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
+                                                        {item.product && item.product.image && (
+                                                            <img 
+                                                                src={item.product.image} 
+                                                                alt={item.product?.name || "Product"} 
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        )}
+                                                    </div>
                                                     <div className="flex-grow">
-                                                        <h3 className="font-medium">{item.product.name}</h3>
+                                                        <h3 className="font-medium">
+                                                            {item.product?.name || "Product unavailable"}
+                                                        </h3>
                                                         <p className="text-sm text-gray-500">
-                                                            Quantity: {item.quantity} × ${item.product.price.toFixed(2)}
+                                                            Quantity: {item.quantity} × ${item.price?.toFixed(2) || "N/A"}
                                                         </p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="flex items-center">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                className="form-checkbox h-5 w-5 text-blue-600"
+                                                            />
+                                                            <span className="ml-2 text-sm text-gray-700">Return</span>
+                                                        </label>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
                                         
-                                        <div className="mt-4 flex justify-end">
+                                        <div className="mt-6">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Reason for return
+                                            </label>
+                                            <select className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                <option value="">Select a reason</option>
+                                                <option value="damaged">Item arrived damaged</option>
+                                                <option value="defective">Item is defective</option>
+                                                <option value="wrong">Wrong item received</option>
+                                                <option value="notAsDescribed">Item not as described</option>
+                                                <option value="other">Other reason</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div className="mt-4">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Additional comments
+                                            </label>
+                                            <textarea 
+                                                className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                rows="3"
+                                                placeholder="Please provide any additional details about your return request"
+                                            ></textarea>
+                                        </div>
+                                        
+                                        <div className="mt-6 flex justify-end">
                                             <button 
                                                 onClick={() => handleReturnRequest(order._id)}
                                                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
                                             >
-                                                Request Return
+                                                Submit Return Request
                                             </button>
                                         </div>
                                     </div>
@@ -113,8 +159,8 @@ export default function Returns() {
                         </div>
                     ) : (
                         <div className="text-center py-8">
-                            <p className="text-xl text-gray-600 mb-4">You don't have any eligible orders for return</p>
-                            <p className="text-gray-500">Only orders from the last 30 days are eligible for returns</p>
+                            <p className="text-xl text-gray-600 mb-4">You don't have any orders</p>
+                            <p className="text-gray-500">No orders were found in your account</p>
                             <button 
                                 onClick={() => router.push('/products')}
                                 className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition"

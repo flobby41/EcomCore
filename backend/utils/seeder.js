@@ -76,20 +76,20 @@ const generateUsers = async (count = 10) => {
   }
 
   // Ajout d'un utilisateur test avec un mot de passe haché
-const testUserPassword = "Test@1234";
-const hashedTestPassword = await bcrypt.hash(testUserPassword, 10);
+  const testUserPassword = "Test@1234";
+  const hashedTestPassword = await bcrypt.hash(testUserPassword, 10);
 
-console.log(`Test User - Email: test@example.com | Password: ${testUserPassword} | Hashed: ${hashedTestPassword}`);
+  console.log(`Test User - Email: test@example.com | Password: ${testUserPassword} | Hashed: ${hashedTestPassword}`);
 
-users.push({
-    name: "Test User",
-    email: "test@example.com",
-    password: hashedTestPassword, // 🔥 Stocke le mot de passe haché
-    address: "123 Main Street",
-    city: "Test City",
-    country: "Test Country",
-    rawPassword: testUserPassword, // Debug seulement
-});
+  users.push({
+      name: "Test User",
+      email: "test@example.com",
+      password: hashedTestPassword, // 🔥 Stocke le mot de passe haché
+      address: "123 Main Street",
+      city: "Test City",
+      country: "Test Country",
+      rawPassword: testUserPassword, // Debug seulement
+  });
   return users;
 };
 
@@ -110,17 +110,41 @@ const generateOrders = async (users, products, count = 15) => {
       email: randomUser.email
     });
 
+    // Créer les items avec les informations complètes du produit
+    const items = randomProducts.map(p => ({
+      productId: p._id,
+      product: {
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        image: p.image,
+        category: p.category
+      },
+      quantity: faker.number.int({ min: 1, max: 3 }),
+      price: p.price
+    }));
+
+    // Calculer le montant total
+    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    // Générer une adresse de livraison
+    const shippingAddress = {
+      street: faker.location.streetAddress(),
+      city: faker.location.city(),
+      state: faker.location.state(),
+      zipCode: faker.location.zipCode(),
+      country: faker.location.country()
+    };
+
     orders.push({
       userId: randomUser._id, // Utiliser l'ID réel de l'utilisateur
       email: randomUser.email,
-      items: randomProducts.map(p => ({
-        productId: p._id,
-        quantity: faker.number.int({ min: 1, max: 3 }),
-        price: p.price
-      })),
-      totalAmount: randomProducts.reduce((sum, p) => sum + parseFloat(p.price), 0),
-      status: faker.helpers.arrayElement(['pending', 'paid', 'cancelled', 'shipped', 'delivered']),
+      items: items,
+      totalAmount: totalAmount,
+      shippingAddress: shippingAddress,
+      status: faker.helpers.arrayElement(['pending', 'paid', 'processing', 'cancelled', 'shipped', 'delivered']),
       stripeSessionId: faker.string.uuid(),
+      isGuestOrder: false
     });
   }
   return orders;
@@ -176,7 +200,7 @@ const seedDatabase = async () => {
     console.log(`✅ Created ${savedReviews.length} reviews`);
 
     console.log('✅ Database seeding completed successfully!');
-    console.log('Utilisateur test ajouté : Email -> john@example.com | Password -> Test@1234');
+    console.log('Utilisateur test ajouté : Email -> test@example.com | Password -> Test@1234');
     console.log('📢 Voici quelques utilisateurs générés avec leurs mots de passe en clair :');
     users.slice(0, 5).forEach(user => {
       console.log(`📧 Email: ${user.email} | 🔑 Password: ${user.rawPassword}`);

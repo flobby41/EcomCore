@@ -16,6 +16,13 @@ const orderSchema = new mongoose.Schema({
             ref: 'Product',
             required: true
         },
+        product: {
+            name: { type: String, required: true },
+            description: { type: String, required: true },
+            price: { type: Number, required: true },
+            image: { type: String, required: true },
+            category: { type: String, required: true }
+        },
         quantity: {
             type: Number,
             required: true
@@ -25,16 +32,27 @@ const orderSchema = new mongoose.Schema({
             required: true
         }
     }],
+    totalAmount: {
+        type: Number,
+        required: true
+    },
+    shippingAddress: {
+        street: { type: String, required: true },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        zipCode: { type: String, required: true },
+        country: { type: String, required: true }
+    },
     status: {
         type: String,
-        enum: ['pending', 'paid', 'cancelled', 'shipped', 'delivered'], // ✅ Nouveaux statuts ajoutés
+        enum: ['pending', 'paid', 'processing', 'cancelled', 'shipped', 'delivered'], 
         default: 'pending'
     },
     stripeSessionId: {
         type: String,
         required: true
     },
-    isGuestOrder: { // ✅ Nouveau champ pour identifier les commandes invités
+    isGuestOrder: { 
         type: Boolean,
         default: false
     }

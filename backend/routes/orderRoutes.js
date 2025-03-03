@@ -3,6 +3,7 @@ const Order = require("../models/Order");
 const authMiddleware = require("../middleware/authMiddleware"); // Ajout du middleware
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Product = require("../models/Product");
 
 // GET /api/orders - Récupérer les commandes de l'utilisateur
 router.get('/', authMiddleware, async (req, res) => {
@@ -131,6 +132,50 @@ router.get('/verify-guest-payment', async (req, res) => {
             message: "Erreur lors de la vérification du paiement",
             error: error.message 
         });
+    }
+});
+
+// Créer une nouvelle commande
+router.post("/", async (req, res) => {
+    try {
+        const { userId, email, items, totalAmount, shippingAddress, stripeSessionId, isGuestOrder } = req.body;
+        
+        // Enrichir les items avec les détails complets des produits
+        const enrichedItems = await Promise.all(items.map(async (item) => {
+            const product = await Product.findById(item.productId);
+            if (!product) {
+                throw new Error(`Product with ID ${item.productId} not found`);
+            }
+            
+            return {
+                productId: item.productId,
+                product: {
+                    name: product.name,
+                    description: product.description,
+                    price: product.price,
+                    image: product.image,
+                    category: product.category
+                },
+                quantity: item.quantity,
+                price: item.price
+            };
+        }));
+        
+        const newOrder = new Order({
+            userId,
+            email,
+            items: enrichedItems,
+            totalAmount,
+            shippingAddress,
+            stripeSessionId,
+            isGuestOrder
+        });
+        
+        await newOrder.save();
+        res.status(201).json(newOrder);
+    } catch (error) {
+        console.error("Error creating order:", error);
+        res.status(500).json({ message: "Error creating order", error: error.message });
     }
 });
 
