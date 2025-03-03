@@ -2,21 +2,24 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 
 export default function Navbar() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
-    const { cart, clearCart, addToCart, loadCart } = useCart(); // ✅ Changé fetchCart en loadCart
+    const { cart, clearCart, loadCart } = useCart();
+    const { wishlist, loadWishlist } = useWishlist();
 
     useEffect(() => {
         const checkAuth = () => {
             const token = localStorage.getItem("token");
-            setIsAuthenticated(!!token); // Convertit en booléen
+            setIsAuthenticated(!!token);
         };
 
-        checkAuth(); // Vérification au chargement
-        loadCart(); // ✅ Changé fetchCart en loadCart
-        // Écoute chaque changement d'URL et met à jour `isAuthenticated`
+        checkAuth();
+        loadCart();
+        loadWishlist(); // Charger la wishlist au démarrage
+        
         router.events?.on("routeChangeComplete", checkAuth);
 
         return () => {
@@ -59,12 +62,51 @@ export default function Navbar() {
         router.push("/login");
     };
 
+    const handleWishlistClick = (e) => {
+        e.preventDefault();
+        console.log('tu es connecté ?', isAuthenticated);
+        if (isAuthenticated) {
+            router.push('/wishlist');
+        } else {
+            router.push('/login');
+        }
+    };
+
     return (
         <nav className="bg-gray-800 text-white p-4">
             <div className="container mx-auto flex justify-between">
                 <Link href="/" className="text-xl font-bold">VogueLine</Link>
-                <div>
+                <div className="flex items-center">
                     <Link href="/products" className="mx-4 hover:text-gray-300">Products</Link>
+                    
+                    {/* Wishlist Icon - Modifié pour utiliser onClick au lieu de href */}
+                    <a 
+                        href="#" 
+                        onClick={handleWishlistClick} 
+                        className="mx-4 hover:text-gray-300 relative cursor-pointer"
+                    >
+                        <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            className="h-6 w-6" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                        >
+                            <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth={2} 
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
+                            />
+                        </svg>
+                        {isAuthenticated && wishlist.length > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                                {wishlist.length}
+                            </span>
+                        )}
+                    </a>
+                    
+                    {/* Cart Icon */}
                     <Link href="/cart" className="mx-4 hover:text-gray-300 relative">
                         🛒 Cart
                         {cart.length > 0 && (

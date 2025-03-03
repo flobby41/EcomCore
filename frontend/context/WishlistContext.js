@@ -1,0 +1,164 @@
+import { createContext, useState, useContext, useEffect } from "react";
+import toast from 'react-hot-toast';
+
+// Création du contexte
+const WishlistContext = createContext();
+
+// Hook personnalisé pour accéder au contexte plus facilement
+export const useWishlist = () => useContext(WishlistContext);
+
+// Provider de la wishlist
+export const WishlistProvider = ({ children }) => {
+    const [wishlist, setWishlist] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const loadWishlist = async () => {
+        const token = localStorage.getItem("token");
+        console.log("🔄 Début du chargement de la wishlist, token présent:", !!token);
+        
+        if (!token) {
+            setWishlist([]);
+            return;
+        }
+        
+        setIsLoading(true);
+        
+        try {
+            const headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+            
+            console.log("📤 Envoi de la requête à la wishlist...");
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wishlist`, {
+                headers
+            });
+            
+            console.log("📥 Réponse reçue, statut:", response.status);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log("🔑 Données reçues de la wishlist:", data);
+                
+                if (data && data.items && Array.isArray(data.items)) {
+                    const transformedItems = data.items.map(item => ({
+                        _id: item.productId._id,
+                        name: item.productId.name,
+                        price: item.productId.price,
+                        image: item.productId.image || '/placeholder-image.jpg',
+                        category: item.productId.category
+                    }));
+                    setWishlist(transformedItems);
+                } else {
+                    console.warn("⚠️ Format de données inattendu:", data);
+                    setWishlist([]);
+                }
+            } else {
+                console.error("❌ Erreur API:", response.status);
+                if (response.status === 401 || response.status === 404) {
+                    setWishlist([]);
+                }
+            }
+        } catch (error) {
+            console.error("❌ Exception lors du chargement de la wishlist:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Charger la wishlist au démarrage et quand le token change
+    useEffect(() => {
+        loadWishlist();
+    }, []);
+
+    const addToWishlist = async (product) => {
+        const token = localStorage.getItem("token");
+        
+        if (!token) {
+            return false; // Indique qu'il faut rediriger vers login
+        }
+        
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wishlist/add`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ productId: product._id })
+            });
+
+            if (response.ok) {
+                // Ajouter localement pour éviter un rechargement complet
+                setWishlist(prev => {
+                    if (!prev.some(item => item._id === product._id)) {
+                        return [...prev, product];
+                    }
+                    return prev;
+                });
+                
+                toast.success('Added to wishlist');
+                return true;
+            } else {
+                toast.error('Failed to add to wishlist');
+                return false;
+            }
+        } catch (error) {
+            console.error("Erreur:", error);
+            toast.error("Error syncing with server");
+            return false;
+        }
+    };
+
+    const removeFromWishlist = async (productId) => {
+        const token = localStorage.getItem("token");
+        
+        if (!token) return false;
+        
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wishlist/remove`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ productId })
+            });
+
+            if (response.ok) {
+                // Mettre à jour localement
+                setWishlist(prev => prev.filter(item => item._id !== productId));
+                toast.success('Removed from wishlist');
+                return true;
+            } else {
+                toast.error('Failed to remove from wishlist');
+                return false;
+            }
+        } catch (error) {
+            console.error("Erreur:", error);
+            toast.error("Error syncing with server");
+            return false;
+        }
+    };
+
+    const isInWishlist = (productId) => {
+        return wishlist.some(item => item._id === productId);
+    };
+
+    const isAuthenticated = () => {
+        return !!localStorage.getItem("token");
+    };
+
+    return (
+        <WishlistContext.Provider value={{ 
+            wishlist, 
+            addToWishlist, 
+            removeFromWishlist, 
+            loadWishlist,
+            isInWishlist,
+            isLoading
+        }}>
+            {children}
+        </WishlistContext.Provider>
+    );
+}; 

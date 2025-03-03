@@ -13,6 +13,7 @@ const authRoutes = require("./routes/authRoutes").router;
 const userRoutes = require('./routes/userRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const passport = require('./config/passport');
+const wishlistRoutes = require('./routes/wishlistRoutes');
 
 
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin', userRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 // Connexion à MongoDB Atlas avec Mongoose
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("✅ MongoDB Atlas connecté"))
