@@ -6,6 +6,8 @@ const WishlistSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    userEmail: { type: String, required: true },
+
     items: [
         {
             productId: {
@@ -13,6 +15,9 @@ const WishlistSchema = new mongoose.Schema({
                 ref: 'Product',
                 required: true
             },
+            productName: { type: String, required: true },
+            quantity: { type: Number, required: true, default: 1 },
+            price: { type: Number, required: true },
             addedAt: {
                 type: Date,
                 default: Date.now

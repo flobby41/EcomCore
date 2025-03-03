@@ -40,6 +40,7 @@ exports.addToWishlist = async (req, res) => {
         if (!wishlist) {
             wishlist = new Wishlist({
                 userId: req.user.id,
+                userEmail: req.user.email,
                 items: []
             });
         }
@@ -53,9 +54,12 @@ exports.addToWishlist = async (req, res) => {
             return res.status(200).json({ message: 'Product already in wishlist' });
         }
         
-        // Ajouter le produit à la wishlist
+        // Ajouter le produit à la wishlist avec les informations supplémentaires
         wishlist.items.push({
             productId,
+            productName: product.name,
+            price: product.price,
+            quantity: 1,
             addedAt: new Date()
         });
         
