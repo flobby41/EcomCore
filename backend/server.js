@@ -46,6 +46,10 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin', userRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+
+// Routes utilisateur
+app.use('/api/users', require('./routes/userRoutes'));
+
 // Connexion à MongoDB Atlas avec Mongoose
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("✅ MongoDB Atlas connecté"))

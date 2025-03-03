@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
+const userController = require('../controllers/userController');
 
 // /api/admin   Récupérer tous les utilisateurs (protégé, admin seulement)
 router.get("/users", authMiddleware, async (req, res) => {
@@ -81,5 +82,14 @@ router.delete("/users/:id", authMiddleware, async (req, res) => {
         res.status(500).json({ message: "Erreur serveur" });
     }
 });
+
+// Route pour récupérer les informations de l'utilisateur connecté
+router.get('/me', authMiddleware, userController.getCurrentUser);
+
+// Route pour mettre à jour les informations de l'utilisateur
+router.put('/update', authMiddleware, userController.updateUser);
+
+// Route pour changer le mot de passe
+router.put('/change-password', authMiddleware, userController.changePassword);
 
 module.exports = router; 

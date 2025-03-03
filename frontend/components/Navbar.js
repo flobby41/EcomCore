@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
@@ -9,6 +9,8 @@ export default function Navbar() {
     const router = useRouter();
     const { cart, clearCart, loadCart } = useCart();
     const { wishlist, loadWishlist, clearWishlist } = useWishlist();
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const profileMenuRef = useRef(null);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -96,10 +98,94 @@ export default function Navbar() {
         <nav className="bg-gray-800 text-white p-4">
             <div className="container mx-auto flex justify-between">
                 <Link href="/" className="text-xl font-bold">VogueLine</Link>
+                
                 <div className="flex items-center">
+                    {/* Navigation Links */}
                     <Link href="/products" className="mx-4 hover:text-gray-300">Products</Link>
+                    <Link href="/categories" className="mx-4 hover:text-gray-300">Categories</Link>
                     
-                    {/* Wishlist Icon - Modifié pour utiliser onClick au lieu de href */}
+                    {/* Profile Icon */}
+                    <div className="relative mx-4">
+                        <button 
+                            className="hover:text-gray-300 focus:outline-none"
+                            onMouseEnter={() => setShowProfileMenu(true)}
+                        >
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                className="h-6 w-6" 
+                                fill="none" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor"
+                            >
+                                <path 
+                                    strokeLinecap="round" 
+                                    strokeLinejoin="round" 
+                                    strokeWidth={2} 
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
+                                />
+                            </svg>
+                        </button>
+                        
+                        {showProfileMenu && (
+                            <div 
+                                ref={profileMenuRef}
+                                className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10"
+                                onMouseLeave={() => setShowProfileMenu(false)}
+                            >
+                                {isAuthenticated ? (
+                                    <>
+                                        <div className="px-4 py-2 text-sm text-gray-700 font-semibold border-b">
+                                            Your account
+                                        </div>
+                                        <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Your account
+                                        </Link>
+                                        <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Orders
+                                        </Link>
+                                        <Link href="/returns" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Return an item
+                                        </Link>
+                                        <Link href="/help" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Help & FAQ
+                                        </Link>
+                                        <button 
+                                            onClick={handleLogout}
+                                            className="block w-full text-left px-4 py-2 text-sm text-purple-600 hover:bg-gray-100 border-t"
+                                        >
+                                            Sign out
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="px-4 py-2 text-sm text-gray-700 font-semibold border-b">
+                                            Sign in
+                                        </div>
+                                        <Link href="/login" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Sign in
+                                        </Link>
+                                        <Link href="/register" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Register
+                                        </Link>
+                                        <Link href="/account" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Your account
+                                        </Link>
+                                        <Link href="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Orders
+                                        </Link>
+                                        <Link href="/returns" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Return an item
+                                        </Link>
+                                        <Link href="/help" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Help & FAQ
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Wishlist Icon */}
                     <a 
                         href="#" 
                         onClick={handleWishlistClick} 
@@ -135,31 +221,6 @@ export default function Navbar() {
                             </span>
                         )}
                     </Link>
-
-                    {isAuthenticated ? (
-                        <>
-                            <Link href="/orders" className="mx-4 hover:text-gray-300">📦 My Orders</Link>
-                            <button 
-                                onClick={handleLogout} 
-                                className="mx-4 bg-red-500 px-4 py-2 rounded hover:bg-red-700 transition"
-                            >
-                                Sign Out
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link href="/login" className="mx-4 hover:text-gray-300">Sign In</Link>
-                            <Link href="/register" className="mx-4 hover:text-gray-300">Sign Up</Link>
-                            {cart.length > 0 && (
-                                <Link 
-                                    href="/checkout/guest" 
-                                    className="mx-4 bg-green-500 px-4 py-2 rounded hover:bg-green-600 transition"
-                                >
-                                    Guest Checkout
-                                </Link>
-                            )}
-                        </>
-                    )}
                 </div>
             </div>
         </nav>
