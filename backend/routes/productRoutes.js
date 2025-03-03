@@ -40,12 +40,30 @@ router.post("/", async (req, res) => {
 });
 
 
-// Route pour obtenir toutes les catégories uniques
+// Route pour obtenir toutes les catégories uniques avec des informations supplémentaires
 router.get('/categories', async (req, res) => {
   try {
-    const categories = await Product.distinct('category');
-    // S'assurer que categories est un tableau
-    res.json(Array.isArray(categories) ? categories : []);
+    // Récupérer les catégories distinctes
+    const categoriesNames = await Product.distinct('category');
+    
+    // Récupérer des informations supplémentaires pour chaque catégorie
+    const categoriesWithDetails = await Promise.all(
+      categoriesNames.map(async (categoryName) => {
+        // Compter le nombre de produits dans cette catégorie
+        const count = await Product.countDocuments({ category: categoryName });
+        
+        // Récupérer un produit représentatif pour obtenir une image
+        const sampleProduct = await Product.findOne({ category: categoryName });
+        
+        return {
+          name: categoryName,
+          count: count,
+          image: sampleProduct?.image || null
+        };
+      })
+    );
+    
+    res.json(categoriesWithDetails);
   } catch (error) {
     console.error('Error fetching categories:', error);
     res.status(500).json({ message: 'Error fetching categories' });
