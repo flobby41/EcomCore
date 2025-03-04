@@ -74,22 +74,41 @@ router.post("/", authMiddleware, async (req, res) => {
 // ✅ Nouvelle route pour la création de session invité
 router.post('/create-guest-session', async (req, res) => {
     try {
-        const { items, email } = req.body;
+        const { items, email, shippingAddress } = req.body;
 
         if (!items || !items.length) {
-            return res.status(400).json({ message: "Le panier est vide" });
+            return res.status(400).json({ message: "Your cart is empty" });
         }
 
-        // Créer la commande pour l'invité
+        // Calculer le montant total
+        const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Créer la commande pour l'invité avec tous les champs requis
         const order = new Order({
             email,
+            totalAmount,
             items: items.map(item => ({
                 productId: item._id,
                 quantity: item.quantity,
-                price: item.price
+                price: item.price,
+                product: {
+                    name: item.name,
+                    description: item.description || "No description available",
+                    price: item.price,
+                    image: item.image || "https://via.placeholder.com/150",
+                    category: item.category || "Uncategorized"
+                }
             })),
             status: 'pending',
-            isGuestOrder: true // ✅ Marquer comme commande invité
+            isGuestOrder: true,
+            // Utiliser l'adresse fournie par l'utilisateur
+            shippingAddress: shippingAddress || {
+                street: "To be provided",
+                city: "To be provided",
+                state: "To be provided",
+                zipCode: "00000",
+                country: "To be provided"
+            }
         });
 
         // Créer les line_items pour Stripe
@@ -98,7 +117,7 @@ router.post('/create-guest-session', async (req, res) => {
                 currency: 'eur',
                 product_data: {
                     name: item.name,
-                    images: [item.image]
+                    images: [item.image].filter(Boolean)
                 },
                 unit_amount: Math.round(item.price * 100),
             },
@@ -111,7 +130,13 @@ router.post('/create-guest-session', async (req, res) => {
             mode: 'payment',
             success_url: req.body.success_url,
             cancel_url: req.body.cancel_url,
-            customer_email: email, // ✅ Pré-remplir l'email
+            customer_email: email,
+            shipping_address_collection: {
+                allowed_countries: ['FR', 'US', 'CA', 'GB', 'DE', 'IT', 'ES']
+            },
+            metadata: {
+                orderId: order._id.toString()
+            }
         });
 
         // Mettre à jour la commande avec l'ID de session Stripe

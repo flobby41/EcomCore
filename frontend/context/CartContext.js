@@ -135,13 +135,18 @@ export const CartProvider = ({ children }) => {
 
                 if (cartResponse.ok) {
                     const data = await cartResponse.json();
-                    const transformedItems = data.items.map(item => ({
-                        _id: item.productId._id,
-                        name: item.productId.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        image: item.productId.image
-                    }));
+                    const transformedItems = data.items.map(item => {
+                        // Vérifier si productId est un objet (après population) ou juste un ID
+                        const isPopulated = typeof item.productId === 'object' && item.productId !== null;
+                        
+                        return {
+                            _id: isPopulated ? item.productId._id : item.productId,
+                            name: isPopulated ? item.productId.name : item.productName,
+                            price: item.price,
+                            quantity: item.quantity,
+                            image: isPopulated && item.productId.image ? item.productId.image : '/placeholder-image.jpg'
+                        };
+                    });
                     setCart(transformedItems);
                 }
 

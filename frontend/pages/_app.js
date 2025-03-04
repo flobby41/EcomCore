@@ -1,5 +1,7 @@
 import { CartProvider } from "../context/CartContext";
 import { WishlistProvider } from "../context/WishlistContext";
+import Layout from '../components/Layout';
+
 import Navbar from "../components/Navbar";
 import { Toaster } from 'react-hot-toast';
 import "../styles/globals.css";
@@ -8,8 +10,7 @@ function MyApp({ Component, pageProps }) {
     return (
             <WishlistProvider>
                 <CartProvider>
-                    
-                    <Navbar />
+                    <Layout>
                     <Component {...pageProps} />
                     <Toaster 
                         position="top-right"
@@ -21,6 +22,7 @@ function MyApp({ Component, pageProps }) {
                             },
                         }}
                     />
+                    </Layout>
                 </CartProvider>
             </WishlistProvider>
     );
