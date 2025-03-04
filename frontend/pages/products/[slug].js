@@ -5,27 +5,28 @@ import ReviewsList from '../../components/ReviewsList';
 
 export default function ProductDetail() {
     const router = useRouter();
-    const { id } = router.query;
+    const { slug } = router.query;
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const { addToCart } = useCart();
 
     useEffect(() => {
-        if (!id) return;
-        fetch(`http://localhost:5001/api/products/${id}`)
+        if (!slug) return;
+        fetch(`http://localhost:5001/api/products/by-slug/${slug}`)
             .then((res) => res.json())
             .then((data) => {
                 setProduct(data);
                 setLoading(false);
             })
-            .catch((error) => console.error("Erreur chargement produit :", error));
-    }, [id]);
+            .catch((error) => console.error("Error loading product:", error));
+    }, [slug]);
 
-    if (loading) return <p className="text-center text-gray-500">Chargement...</p>;
+    if (loading) return <p className="text-center text-gray-500">Loading...</p>;
+    if (!product) return <p className="text-center text-red-500">Product not found</p>;
 
     const handleAddToCart = () => {
         addToCart(product);
-        // Animation du bouton (optionnel)
+        // Button animation (optional)
         const button = document.activeElement;
         button.classList.add('scale-95');
         setTimeout(() => button.classList.remove('scale-95'), 100);

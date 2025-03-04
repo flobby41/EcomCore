@@ -128,4 +128,15 @@ router.delete("/:id", async (req, res) => {
     }
 });
 
+// Récupérer un produit par slug
+router.get("/by-slug/:slug", async (req, res) => {
+    try {
+        const product = await Product.findOne({ slug: req.params.slug });
+        if (!product) return res.status(404).json({ message: "Product not found" });
+        res.status(200).json(product);
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving product", error });
+    }
+});
+
 module.exports = router;

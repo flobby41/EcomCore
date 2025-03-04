@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 const { faker } = require('@faker-js/faker');
 const bcrypt = require('bcrypt');
+const slugify = require('slugify');
 require('dotenv').config({ path: './backend/.env' });
 
 // Import des modèles
@@ -35,8 +36,15 @@ const generateProducts = (count) => {
   const products = [];
   
   for (let i = 0; i < count; i++) {
+    const name = faker.commerce.productName();
     const product = {
-      name: faker.commerce.productName(),
+      name: name,
+      // Générer le slug manuellement
+      slug: slugify(name, {
+        lower: true,
+        strict: true,
+        trim: true
+      }) + `-${faker.string.alphanumeric(6)}`, // Ajouter un identifiant unique
       description: faker.commerce.productDescription(),
       price: parseFloat(faker.commerce.price({ min: 10, max: 1000 })),
       image: faker.image.url(),
@@ -163,7 +171,15 @@ const seedDatabase = async () => {
 
     // Générer et insérer les nouveaux produits
     const products = generateProducts(20); // ou le nombre que vous souhaitez
-    const savedProducts = await Product.insertMany(products);
+    
+    // Insérer les produits un par un pour s'assurer que les slugs sont uniques
+    const savedProducts = [];
+    for (const product of products) {
+      const savedProduct = await new Product(product).save();
+      savedProducts.push(savedProduct);
+    }
+    
+    console.log(`✅ Created ${savedProducts.length} products`);
     
     // Générer et insérer les utilisateurs
     const users = await generateUsers();

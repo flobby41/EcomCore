@@ -185,7 +185,7 @@ export default function Navbar() {
                         <div className="absolute z-10 w-full bg-white mt-1 rounded-md shadow-lg max-h-96 overflow-y-auto">
                             {searchResults.map((product) => (
                                 <Link 
-                                    href={`/products/${product._id}`} 
+                                    href={`/products/${product.slug}`} 
                                     key={product._id}
                                     className="block p-2 hover:bg-gray-100 border-b border-gray-200 text-gray-800"
                                     onClick={() => setShowSearchResults(false)}

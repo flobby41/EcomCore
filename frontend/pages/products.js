@@ -138,7 +138,10 @@ export default function Products() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                               {products.map(product => (
                                   <div key={product._id} className="bg-white rounded-lg shadow-sm overflow-hidden group">
-                                      <Link href={`/products/${product._id}`} className="block relative">
+                                      <Link 
+                                          href={`/products/${product.slug}`} 
+                                          className="block relative"
+                                      >
                                           <div className="relative h-64 w-full overflow-hidden">
                                               <img 
                                                   src={product.image} 
@@ -181,7 +184,7 @@ export default function Products() {
                                           <div className="flex justify-between items-center mt-4">
                                               <span className="font-bold text-lg">${product.price.toFixed(2)}</span>
                                               <Link 
-                                                  href={`/products/${product._id}`}
+                                                  href={`/products/${product.slug}`}
                                                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition"
                                               >
                                                   View Details
