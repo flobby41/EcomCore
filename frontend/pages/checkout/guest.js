@@ -10,6 +10,7 @@ export default function GuestCheckout() {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
+        name: '',
         shippingAddress: {
             street: '',
             city: '',
@@ -120,19 +121,34 @@ export default function GuestCheckout() {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
                                 <h2 className="text-xl font-semibold mb-4 pb-2 border-b">Contact Information</h2>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Email Address
-                                    </label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        required
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="your@email.com"
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Full Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            required
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="John Doe"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                        <input
+                                            type="email"
+                                            id="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="your@email.com"
+                                            required
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

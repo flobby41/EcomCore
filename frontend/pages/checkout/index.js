@@ -185,18 +185,15 @@ export default function Checkout() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Email Address
-                                        </label>
+                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                         <input
                                             type="email"
+                                            id="email"
                                             name="email"
-                                            required
                                             value={userData.email}
-                                            onChange={handleChange}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="your@email.com"
-                                            readOnly
+                                            onChange={(e) => setUserData({...userData, email: e.target.value})}
+                                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                            required
                                         />
                                     </div>
                                 </div>
