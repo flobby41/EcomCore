@@ -2,21 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-
+/* Styles de base pour le mode clair et sombre */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  color-scheme: dark;
+}
+
+/* Styles spécifiques pour le mode sombre */
+.dark body {
+  @apply bg-gray-900 text-gray-100;
+}
+
+/* Styles pour les éléments d'interface en mode sombre */
+.dark input,
+.dark textarea,
+.dark select {
+  @apply bg-gray-800 text-white border-gray-700;
+}
+
+.dark button:not([class*="bg-"]) {
+  @apply bg-gray-700 text-white hover:bg-gray-600;
+}
+
+/* Styles pour les cartes et conteneurs en mode sombre */
+.dark .card,
+.dark .container {
+  @apply bg-gray-800 text-white;
+}
+
+/* Styles pour les liens en mode sombre */
+.dark a:not([class*="text-"]) {
+  @apply text-blue-400 hover:text-blue-300;
+}
+
+/* Styles pour les bordures en mode sombre */
+.dark [class*="border"] {
+  @apply border-gray-700;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Assurez-vous que tous les éléments de l'interface utilisateur ont des styles dark mode appropriés */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: rgb(31, 41, 55);
+  color: rgb(229, 231, 235);
+  border-color: rgb(75, 85, 99);
+}
+
+.dark button {
+  @apply bg-gray-700 text-white hover:bg-gray-600;
+}
+
+/* Ajoutez d'autres styles spécifiques au dark mode selon vos besoins */
