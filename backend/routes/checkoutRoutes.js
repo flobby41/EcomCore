@@ -174,16 +174,34 @@ router.post('/create-session', authMiddleware, async (req, res) => {
             return res.status(404).json({ message: "Utilisateur non trouvé" });
         }
 
-        // Créer la commande avec l'email de l'utilisateur
+        // Calculer le montant total
+        const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+        // Créer la commande avec l'email de l'utilisateur et tous les champs requis
         const order = new Order({
             userId: req.user.id,
-            email: user.email, // ✅ Ajout de l'email
+            email: user.email,
+            totalAmount: totalAmount,
             items: items.map(item => ({
                 productId: item._id,
                 quantity: item.quantity,
-                price: item.price
+                price: item.price,
+                product: {
+                    name: item.name || "Product",
+                    description: item.description || "No description available",
+                    price: item.price,
+                    image: item.image || "https://via.placeholder.com/150",
+                    category: item.category || "Uncategorized"
+                }
             })),
-            status: 'pending'
+            status: 'pending',
+            shippingAddress: {
+                street: "To be provided",
+                city: "To be provided",
+                state: "To be provided",
+                zipCode: "00000",
+                country: "To be provided"
+            }
         });
 
         console.log("📝 Commande créée:", order);
@@ -210,6 +228,9 @@ router.post('/create-session', authMiddleware, async (req, res) => {
             success_url: req.body.success_url,
             cancel_url: req.body.cancel_url,
             client_reference_id: req.user.id,
+            shipping_address_collection: {
+                allowed_countries: ['FR', 'US', 'CA', 'GB', 'DE', 'IT', 'ES']
+            },
             metadata: {
                 orderId: order._id.toString()
             }
