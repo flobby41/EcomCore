@@ -171,11 +171,21 @@ const Footer = () => {
             <div className="mb-4 md:mb-0">
               <h5 className="text-sm font-medium mb-2">We Accept</h5>
               <div className="flex space-x-4">
-                <img src="/images/payment/visa.svg" alt="Visa" className="h-8" />
-                <img src="/images/payment/mastercard.svg" alt="Mastercard" className="h-8" />
-                <img src="/images/payment/amex.svg" alt="American Express" className="h-8" />
-                <img src="/images/payment/paypal.svg" alt="PayPal" className="h-8" />
-                <img src="/images/payment/apple-pay.svg" alt="Apple Pay" className="h-8" />
+                <div className="h-8 w-auto">
+                  <img src="/images/payment/visa.svg" alt="Visa" className="h-full object-contain" />
+                </div>
+                <div className="h-8 w-auto">
+                  <img src="/images/payment/mastercard.svg" alt="Mastercard" className="h-full object-contain" />
+                </div>
+                <div className="h-8 w-auto">
+                  <img src="/images/payment/amex.svg" alt="American Express" className="h-full object-contain" />
+                </div>
+                <div className="h-8 w-auto">
+                  <img src="/images/payment/paypal.svg" alt="PayPal" className="h-full object-contain" />
+                </div>
+                <div className="h-8 w-auto">
+                  <img src="/images/payment/apple-pay.svg" alt="Apple Pay" className="h-full object-contain" />
+                </div>
               </div>
             </div>
             <div>
@@ -183,7 +193,7 @@ const Footer = () => {
               <div className="flex space-x-4">
                 <img src="/images/shipping/dhl.svg" alt="DHL" className="h-8" />
                 <img src="/images/shipping/fedex.svg" alt="FedEx" className="h-8" />
-                <img src="/images/shipping/ups.svg" alt="UPS" className="h-8" />
+                <img src="/images/shipping/ups.png" alt="UPS" className="h-8" />
               </div>
             </div>
           </div>
