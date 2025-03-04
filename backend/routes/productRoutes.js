@@ -70,6 +70,31 @@ router.get('/categories', async (req, res) => {
   }
 });
 
+// Route pour rechercher des produits (doit être placée AVANT la route /:id)
+router.get("/search", async (req, res) => {
+  try {
+    const { query } = req.query;
+    
+    if (!query) {
+      return res.status(400).json({ message: "Search parameter is required" });
+    }
+    
+    // Recherche par nom ou description avec une expression régulière insensible à la casse
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } }
+      ]
+    });
+    
+    res.json(products);
+  } catch (error) {
+    console.error("Error searching products:", error);
+    res.status(500).json({ message: "Error searching products", error });
+  }
+});
+
 // ➤ Récupérer un produit par ID (GET /api/products/:id)
 router.get("/:id", async (req, res) => {
     try {
@@ -102,7 +127,5 @@ router.delete("/:id", async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la suppression du produit", error });
     }
 });
-
-
 
 module.exports = router;

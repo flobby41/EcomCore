@@ -20,9 +20,14 @@ export default function Products() {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                const url = category 
-                    ? `http://localhost:5001/api/products?category=${encodeURIComponent(category)}`
-                    : "http://localhost:5001/api/products";
+                const { category, search } = router.query;
+                let url = 'http://localhost:5001/api/products';
+                
+                if (search) {
+                    url = `http://localhost:5001/api/products/search?query=${encodeURIComponent(search)}`;
+                } else if (category && category !== 'all') {
+                    url = `http://localhost:5001/api/products?category=${encodeURIComponent(category)}`;
+                }
                 
                 const response = await fetch(url);
                 
@@ -56,7 +61,7 @@ export default function Products() {
         
         fetchProducts();
         fetchCategories();
-    }, [category]);
+    }, [router.query]);
 
     useEffect(() => {
         setIsAuthenticated(!!localStorage.getItem("token"));
