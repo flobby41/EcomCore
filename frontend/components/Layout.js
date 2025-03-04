@@ -77,7 +77,7 @@ export default function Layout({ children, title = "E-Commerce Store" }) {
             
             <Navbar />
             
-            <main className="flex-grow">
+            <main className="flex-grow pt-16">
                 {children}
             </main>
             
