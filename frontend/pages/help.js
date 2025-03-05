@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { successToast } from '../utils/toast-utils';
+import { infoToast } from '../utils/toast-utils';
 export default function Help() {
     const [activeCategory, setActiveCategory] = useState("orders");
     const [expandedFaq, setExpandedFaq] = useState(null);
@@ -70,7 +70,7 @@ export default function Help() {
     };
 
     const contactSupport = () => {
-        successToast("Support request submitted. Our team will contact you shortly.");
+        infoToast("Support request submitted. Our team will contact you shortly.");
     };
 
     return (
