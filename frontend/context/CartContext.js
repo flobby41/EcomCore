@@ -1,6 +1,7 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { successToast } from '../utils/toast-utils';
 
 // Création du contexte
 const CartContext = createContext();
@@ -150,10 +151,7 @@ export const CartProvider = ({ children }) => {
                     });
                     setCart(transformedItems);
                 }
-
-                toast.success(<div>
-                  Product added to cart! <Link href="/cart" className="font-bold text-blue-500 underline">View Cart</Link>
-              </div>);
+              successToast("Product added to cart!")
             } catch (error) {
                 console.error("Erreur:", error);
                 toast.error("Erreur de synchronisation avec le serveur");
@@ -171,9 +169,7 @@ export const CartProvider = ({ children }) => {
                 }
                 return [...prevCart, { ...product, quantity: 1 }];
             });
-            toast.success(<div>
-              Product added to cart! <Link href="/cart" className="font-bold text-blue-500 underline">View Cart</Link>
-          </div>);
+            successToast("Product added to cart!")
         }
     };
 
@@ -197,7 +193,7 @@ export const CartProvider = ({ children }) => {
             return updatedCart;
         });
         
-        toast.success('Product removed from cart');
+        successToast('Product removed from cart');
 
         // Synchronisation avec le backend
         if (token) {
@@ -229,7 +225,7 @@ export const CartProvider = ({ children }) => {
                 p._id === productId ? { ...p, quantity } : p
             )
         );
-        toast.success('Quantity updated');
+        successToast('Quantity updated');
 
         // Synchronisation avec le backend
         if (token) {
@@ -272,7 +268,7 @@ export const CartProvider = ({ children }) => {
         localStorage.removeItem("cart");
         
         if (showToast) {
-            toast.success('Cart emptied');
+            successToast('Cart emptied');
         }
 
         // Synchronisation avec le backend
@@ -339,7 +335,7 @@ export const CartProvider = ({ children }) => {
                 localStorage.removeItem("cart");
                 // Recharger le panier depuis le serveur
                 await loadCart();
-                toast.success('Your cart has been updated');
+                successToast('Your cart has been updated');
             } else {
                 console.error("❌ Erreur lors de la fusion du panier:", await response.text());
             }
