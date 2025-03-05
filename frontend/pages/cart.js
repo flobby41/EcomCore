@@ -17,7 +17,11 @@ export default function Cart() {
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const handleQuantityChange = (productId, newQuantity) => {
-        if (newQuantity < 1) return;
+        if (newQuantity < 1) {
+            // Si la quantité est inférieure à 1, supprimer le produit
+            removeFromCart(productId);
+            return;
+        }
         updateQuantity(productId, newQuantity);
     };
 
