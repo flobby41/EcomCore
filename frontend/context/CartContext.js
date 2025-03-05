@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 // Création du contexte
 const CartContext = createContext();
@@ -150,7 +151,9 @@ export const CartProvider = ({ children }) => {
                     setCart(transformedItems);
                 }
 
-                toast.success('Product added to cart!');
+                toast.success(<div>
+                  Product added to cart! <Link href="/cart" className="font-bold text-blue-500 underline">View Cart</Link>
+              </div>);
             } catch (error) {
                 console.error("Erreur:", error);
                 toast.error("Erreur de synchronisation avec le serveur");
@@ -168,7 +171,9 @@ export const CartProvider = ({ children }) => {
                 }
                 return [...prevCart, { ...product, quantity: 1 }];
             });
-            toast.success('Product added to cart!');
+            toast.success(<div>
+              Product added to cart! <Link href="/cart" className="font-bold text-blue-500 underline">View Cart</Link>
+          </div>);
         }
     };
 
@@ -334,7 +339,7 @@ export const CartProvider = ({ children }) => {
                 localStorage.removeItem("cart");
                 // Recharger le panier depuis le serveur
                 await loadCart();
-                toast.success('Your cart has been restored');
+                toast.success('Your cart has been updated');
             } else {
                 console.error("❌ Erreur lors de la fusion du panier:", await response.text());
             }
