@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import { successToast } from '../utils/toast-utils';
+import { successToast,productAddedToast, productRemovedToast } from '../utils/toast-utils';
 
 // Création du contexte
 const CartContext = createContext();
@@ -151,7 +151,7 @@ export const CartProvider = ({ children }) => {
                     });
                     setCart(transformedItems);
                 }
-              successToast("Product added to cart!")
+                productAddedToast(`${product.name}`)
             } catch (error) {
                 console.error("Erreur:", error);
                 toast.error("Erreur de synchronisation avec le serveur");
@@ -169,14 +169,19 @@ export const CartProvider = ({ children }) => {
                 }
                 return [...prevCart, { ...product, quantity: 1 }];
             });
-            successToast("Product added to cart!")
-        }
+            productAddedToast(`${product.name}`)
+          }
     };
 
     // Supprimer un produit du panier
     const removeFromCart = async (productId) => {
         const token = localStorage.getItem("token");
-        
+        const productToRemove = cart.find(p => p._id === productId);
+if (productToRemove) {
+  const undoFunction = () => {
+    // Logique pour remettre le produit dans le panier
+    addToCart(productToRemove);
+  };
         // Mise à jour locale
         setCart(prevCart => {
             const updatedCart = prevCart.filter(p => p._id !== productId);
@@ -193,8 +198,10 @@ export const CartProvider = ({ children }) => {
             return updatedCart;
         });
         
-        successToast('Product removed from cart');
-
+        productRemovedToast(productToRemove.name, undoFunction);
+      } else {
+        productRemovedToast('Product', () => {});
+      }
         // Synchronisation avec le backend
         if (token) {
             try {

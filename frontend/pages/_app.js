@@ -52,8 +52,7 @@ function MyApp({ Component, pageProps }) {
                 <CartProvider>
                     <Layout darkMode={isDarkMode} toggleDarkMode={toggleDarkMode}>
                     <Component {...pageProps} />
-                    <Toaster 
-                        position="top-right"/>
+                    <Toaster />
                     </Layout>
                 </CartProvider>
             </WishlistProvider>
