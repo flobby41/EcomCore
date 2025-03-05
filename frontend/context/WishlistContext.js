@@ -1,5 +1,8 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import toast from 'react-hot-toast';
+import { wishlistAddedToast, wishlistRemovedToast, errorToast } from '../utils/toast-utils';
+
+
 
 // Création du contexte
 const WishlistContext = createContext();
@@ -98,15 +101,15 @@ export const WishlistProvider = ({ children }) => {
                     return prev;
                 });
                 
-                toast.success('Added to wishlist');
+                wishlistAddedToast(product.name);
                 return true;
             } else {
-                toast.error('Failed to add to wishlist');
+                errorToast('Failed to add to wishlist');
                 return false;
             }
         } catch (error) {
             console.error("Erreur:", error);
-            toast.error("Error syncing with server");
+            errorToast("Error syncing with server");
             return false;
         }
     };
@@ -117,6 +120,49 @@ export const WishlistProvider = ({ children }) => {
         if (!token) return false;
         
         try {
+            // Trouver le produit avant de le supprimer pour avoir son nom et ses détails
+            const productToRemove = wishlist.find(item => item._id === productId);
+            const productName = productToRemove ? productToRemove.name : 'Product';
+            
+            // Garder une copie complète du produit pour l'annulation
+            const productCopy = productToRemove ? {...productToRemove} : null;
+            
+            // Mettre à jour localement d'abord pour une réponse immédiate
+            setWishlist(prev => prev.filter(item => item._id !== productId));
+            
+            // Créer une fonction d'annulation qui fonctionne correctement
+            const undoFunction = () => {
+                if (productCopy) {
+                    // Ajouter localement d'abord pour une réponse immédiate
+                    setWishlist(prev => {
+                        if (!prev.some(item => item._id === productCopy._id)) {
+                            return [...prev, productCopy];
+                        }
+                        return prev;
+                    });
+                    
+                    // Puis synchroniser avec le serveur
+                    if (token) {
+                        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wishlist/add`, {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${token}`,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ productId: productCopy._id })
+                        }).catch(error => {
+                            console.error("Erreur lors de l'annulation:", error);
+                            // En cas d'erreur, recharger la wishlist
+                            loadWishlist();
+                        });
+                    }
+                }
+            };
+            
+            // Afficher le toast avec la fonction d'annulation
+            wishlistRemovedToast(productName, undoFunction);
+            
+            // Puis synchroniser avec le serveur
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/wishlist/remove`, {
                 method: "POST",
                 headers: {
@@ -126,18 +172,26 @@ export const WishlistProvider = ({ children }) => {
                 body: JSON.stringify({ productId })
             });
 
-            if (response.ok) {
-                // Mettre à jour localement
-                setWishlist(prev => prev.filter(item => item._id !== productId));
-                toast.success('Removed from wishlist');
-                return true;
-            } else {
-                toast.error('Failed to remove from wishlist');
+            if (!response.ok) {
+                // En cas d'erreur, restaurer l'état précédent
+                if (productCopy) {
+                    setWishlist(prev => {
+                        if (!prev.some(item => item._id === productCopy._id)) {
+                            return [...prev, productCopy];
+                        }
+                        return prev;
+                    });
+                }
+                errorToast('Failed to remove from wishlist');
                 return false;
             }
+            
+            return true;
         } catch (error) {
             console.error("Erreur:", error);
-            toast.error("Error syncing with server");
+            errorToast("Error syncing with server");
+            // Recharger la wishlist en cas d'erreur
+            loadWishlist();
             return false;
         }
     };

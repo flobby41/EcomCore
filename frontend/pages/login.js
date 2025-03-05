@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import { successToast, errorToast } from '../utils/toast-utils';
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -31,13 +32,13 @@ export default function Login() {
                 localStorage.setItem("token", data.token);
                 await loadCart();
                 await mergeLocalCart();
-                toast.success('Successfully signed in!');
+                successToast('Successfully signed in!', null);
                 router.push("/products");
             } else {
-                toast.error(data.message || "Error signing in");
+                errorToast(data.message || "Error signing in");
             }
         } catch (error) {
-            toast.error("Error signing in");
+            errorToast("Error signing in");
         } finally {
             setIsLoading(false);
         }

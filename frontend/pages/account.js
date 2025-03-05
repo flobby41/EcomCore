@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import toast from 'react-hot-toast';
+import { errorToast } from '../utils/toast-utils';
+
 
 export default function Account() {
     const [user, setUser] = useState(null);
@@ -27,12 +28,12 @@ export default function Account() {
                     const userData = await response.json();
                     setUser(userData);
                 } else {
-                    toast.error("Failed to load account information");
+                    errorToast("Failed to load account information");
                     localStorage.removeItem("token");
                     router.push("/login");
                 }
             } catch (error) {
-                toast.error("An error occurred while loading your account");
+                errorToast("An error occurred while loading your account");
             } finally {
                 setLoading(false);
             }

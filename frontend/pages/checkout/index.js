@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useCart } from '../../context/CartContext';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { errorToast } from '../../utils/toast-utils';
 
 export default function Checkout() {
     const router = useRouter();
@@ -135,7 +135,7 @@ export default function Checkout() {
             }
         } catch (error) {
             console.error("❌ Detailed error:", error);
-            toast.error(error.message || "Error processing your order");
+            errorToast(error.message || "Error processing your order");
         } finally {
             setLoading(false);
         }

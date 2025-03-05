@@ -3,8 +3,6 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import Link from "next/link";
 import { useRouter } from 'next/router';
-import { toast } from 'react-hot-toast';
-
 export default function Products() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);

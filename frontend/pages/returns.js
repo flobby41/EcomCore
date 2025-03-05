@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import toast from 'react-hot-toast';
+import { successToast, errorToast } from '../utils/toast-utils';
 
 export default function Returns() {
     const [orders, setOrders] = useState([]);
@@ -36,11 +36,11 @@ export default function Returns() {
                     console.log("Filtered orders:", filteredOrders);
                     setOrders(filteredOrders);
                 } else {
-                    toast.error("Failed to load orders");
+                    errorToast("Failed to load orders");
                 }
             } catch (error) {
                 console.error("Error loading orders:", error);
-                toast.error("An error occurred while loading your orders");
+                errorToast("An error occurred while loading your orders");
             } finally {
                 setLoading(false);
             }
@@ -50,7 +50,7 @@ export default function Returns() {
     }, [orderId, router]);
 
     const handleReturnRequest = (orderId) => {
-        toast.success(`Return request initiated for order #${orderId}. Check your email for return instructions.`);
+        successToast(`Return request initiated for order #${orderId}. Check your email for return instructions.`);
     };
 
     if (loading) {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useCart } from '../../context/CartContext';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { errorToast } from '../../utils/toast-utils';
 
 export default function GuestCheckout() {
     const router = useRouter();
@@ -86,7 +86,7 @@ export default function GuestCheckout() {
             }
 
         } catch (error) {
-            toast.error(error.message || "Error processing order");
+            errorToast(error.message || "Error processing order");
             console.error('Error:', error);
         } finally {
             setLoading(false);

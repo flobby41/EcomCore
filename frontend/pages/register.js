@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { successToast, errorToast } from '../utils/toast-utils';
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -25,7 +25,7 @@ export default function Register() {
         e.preventDefault();
         
         if (formData.password !== formData.confirmPassword) {
-            toast.error("Passwords do not match");
+            errorToast("Passwords do not match");
             return;
         }
 
@@ -45,13 +45,13 @@ export default function Register() {
             const data = await res.json();
 
             if (res.ok) {
-                toast.success("Registration successful!");
+                successToast("Registration successful!");
                 router.push("/login");
             } else {
-                toast.error(data.message || "Error during registration.");
+                errorToast(data.message || "Error during registration.");
             }
         } catch (error) {
-            toast.error("Error during registration.");
+            errorToast("Error during registration.");
         } finally {
             setIsLoading(false);
         }

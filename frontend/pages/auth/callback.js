@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useCart } from '../../context/CartContext';
-import toast from 'react-hot-toast';
+import { successToast } from '../../utils/toast-utils';
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export default function AuthCallback() {
         await loadCart();
         await mergeLocalCart();
         
-        toast.success('Successfully signed in!');
+        successToast('Successfully signed in!');
         router.push('/products');
       }
     };
